@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" role="img" aria-label="AutoRoyal">
+  <rect x="0" y="6" width="36" height="36" rx="10" fill="#2F5BEA"/>
+  <text x="18" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#fff">AR</text>
+  <text x="46" y="30" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#14203A">AutoRoyal</text>
+</svg>

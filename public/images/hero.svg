@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="AutoRoyal - atelier et vehicules">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F6F8FC"/>
+      <stop offset="100%" stop-color="#EAF0FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#g)"/>
+  <g fill="none" stroke="#2F5BEA" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">
+    <path d="M300 520h600l-60-150a70 70 0 0 0-66-46H426a70 70 0 0 0-66 46z"/>
+    <path d="M270 520h660v90a30 30 0 0 1-30 30h-40a30 30 0 0 1-30-30v-20H370v20a30 30 0 0 1-30 30h-40a30 30 0 0 1-30-30z"/>
+    <circle cx="400" cy="560" r="26"/>
+    <circle cx="800" cy="560" r="26"/>
+  </g>
+  <text x="600" y="740" text-anchor="middle" font-family="system-ui, sans-serif" font-size="34" fill="#68748C">AutoRoyal - atelier et vehicules</text>
+</svg>

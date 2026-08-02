@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Palette claire AutoRoyal - modifiable depuis src/config/site.ts */
+    --color-ink: 20 32 58;
+    --color-muted: 104 116 140;
+    --color-canvas: 255 255 255;
+    --color-surface: 246 248 252;
+    --color-line: 226 232 240;
+    --color-accent: 47 91 234;
+    --color-accent-soft: 234 240 255;
+    --color-gold: 198 154 58;
+    --color-success: 22 145 96;
+    --color-warning: 200 138 20;
+    --color-danger: 205 62 62;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas text-ink antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04';
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-canvas rounded-md;
+  }
+
+  ::selection {
+    @apply bg-accent-soft text-ink;
+  }
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-shell px-5 sm:px-6 lg:px-8;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-accent;
+  }
+
+  /* Bandeau diagonal discret utilise en tete de section */
+  .rule-gold {
+    @apply h-px w-16 bg-gold;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* Respect de la preference systeme : aucune animation superflue */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
