@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: autoroyal
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
+    name: autoroyal_db_data
+
+# Usage:
+# 1. docker compose up -d
+# 2. Visit http://localhost:8080 (Adminer) and connect with:
+#    System: PostgreSQL
+#    Server: db
+#    Username: postgres
+#    Password: password
+#    Database: autoroyal
+# 3. Set DATABASE_URL in your .env (see .env.example):
+#    DATABASE_URL="postgresql://postgres:password@localhost:5432/autoroyal?schema=public"
+# 4. Run migrations and seed:
+#    npx prisma migrate dev --name init
+#    npm run db:seed
+# 5. npm run dev
