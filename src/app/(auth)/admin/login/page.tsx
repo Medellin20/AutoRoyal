@@ -1,7 +1,5 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { auth } from '@/lib/auth'
 import { LoginForm } from '@/components/admin/login-form'
 import { Logo } from '@/components/layout/logo'
 
@@ -10,10 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function LoginPage() {
-  const session = await auth()
-  if (session?.user) redirect('/admin')
-
+export default function LoginPage() {
   return (
     <main className="grid min-h-screen place-items-center bg-surface px-5 py-12">
       <div className="w-full max-w-sm">
