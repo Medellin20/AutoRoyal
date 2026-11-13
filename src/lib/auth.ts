@@ -1,7 +1,7 @@
 import type { NextAuthOptions, DefaultSession } from 'next-auth'
 import { getServerSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { getSupabaseAdmin, getSupabasePublic } from '@/lib/supabase'
+import { getSupabasePublic } from '@/lib/supabase'
 import { loginSchema } from '@/validations/auth'
 import type { Role } from '@/types/database'
 
@@ -59,28 +59,18 @@ export const authOptions: NextAuthOptions = {
         if (authError || !authData.user) throw new Error('Identifiants invalides.')
 
         const userEmail = authData.user.email?.toLowerCase() ?? email.toLowerCase()
-        const { data: profile, error: profileError } = await getSupabaseAdmin()
-          .from('users').select('id,name,role,active').eq('email', userEmail).maybeSingle()
-        if (profileError) throw profileError
-
         const metadataRole = authData.user.app_metadata?.role
         const role = (['SUPER_ADMIN', 'ADMIN', 'MANAGER'].includes(metadataRole)
           ? metadataRole
-          : profile?.role) as Role | undefined
+          : undefined) as Role | undefined
         const isConfiguredAdmin = userEmail === process.env.ADMIN_EMAIL?.trim().toLowerCase()
-        if ((profile && !profile.active) || (!role && !isConfiguredAdmin)) {
+        if (metadataRole === 'DISABLED' || (!role && !isConfiguredAdmin)) {
           throw new Error('Ce compte ne dispose pas des droits administrateur.')
         }
 
-        if (profile) {
-          const { error: updateError } = await getSupabaseAdmin().from('users')
-            .update({ lastLoginAt: new Date().toISOString() }).eq('id', profile.id)
-          if (updateError) console.error('[auth] could not update last login')
-        }
-
         return {
-          id: profile?.id ?? authData.user.id,
-          name: profile?.name ?? authData.user.user_metadata?.name ?? userEmail,
+          id: authData.user.id,
+          name: authData.user.user_metadata?.name ?? userEmail,
           email: userEmail,
           role: role ?? 'SUPER_ADMIN',
         }

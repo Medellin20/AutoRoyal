@@ -93,7 +93,16 @@ export async function toggleUserActive(id: string, active: boolean): Promise<Act
   }
   if (id === current.id) return { ok: false, message: 'Vous ne pouvez pas desactiver votre propre compte.' }
 
-  const { error } = await getSupabaseAdmin().from('users')
+  const db = getSupabaseAdmin()
+  const { data: target, error: lookupError } = await db.from('users').select('role').eq('id', id).maybeSingle()
+  if (lookupError || !target) return { ok: false, message: 'Compte introuvable.' }
+
+  const { error: authError } = await db.auth.admin.updateUserById(id, {
+    app_metadata: { role: active ? target.role : 'DISABLED' },
+  })
+  if (authError) return { ok: false, message: 'Modification du compte Supabase Auth impossible.' }
+
+  const { error } = await db.from('users')
     .update({ active, updatedAt: new Date().toISOString() }).eq('id', id)
   if (error) return { ok: false, message: 'Modification du compte impossible.' }
   await logAudit({
