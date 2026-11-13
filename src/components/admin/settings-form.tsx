@@ -73,13 +73,13 @@ export function SettingsForm({
           label="Couleur d accent"
           htmlFor="accentColor"
           error={errors.accentColor?.[0]}
-          hint="Format hexadecimal, par exemple #2F5BEA."
+          hint="Format hexadecimal, par exemple #ED1C24."
         >
           <Input
             id="accentColor"
             name="accentColor"
             type="color"
-            defaultValue={settings?.accentColor ?? '#2F5BEA'}
+            defaultValue={settings?.accentColor ?? '#ED1C24'}
             className="h-11 w-24 p-1"
           />
         </Field>

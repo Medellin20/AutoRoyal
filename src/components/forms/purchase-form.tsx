@@ -85,12 +85,12 @@ export function PurchaseForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Budget" htmlFor="budget" error={errors.budget?.[0]} hint="Facultatif, aide le conseiller a preparer l offre.">
-            <Input id="budget" name="budget" type="number" min={0} step={50000} placeholder="Ex : 6 500 000" />
+            <Input id="budget" name="budget" type="number" min={0} step={500} placeholder="Ex. 15 000" />
           </Field>
 
           <Field label="Mode de paiement souhaite" htmlFor="payment" error={errors.payment?.[0]}>
             <Select id="payment" name="payment" defaultValue="CASH">
-              {Object.entries(paymentLabels).map(([value, label]) => (
+              {Object.entries(paymentLabels).filter(([value]) => value !== 'MOBILE_MONEY').map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
               ))}
             </Select>

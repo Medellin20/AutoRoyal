@@ -52,12 +52,14 @@ export function Footer() {
               <MapPin className="h-4 w-4 shrink-0 text-accent" />
               {siteConfig.contact.address}
             </li>
-            <li className="flex gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-accent" />
-              <a href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`} className="hover:text-accent">
-                {siteConfig.contact.phone}
-              </a>
-            </li>
+            {siteConfig.contact.phone && (
+              <li className="flex gap-2.5">
+                <Phone className="h-4 w-4 shrink-0 text-accent" />
+                <a href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`} className="hover:text-accent">
+                  {siteConfig.contact.phone}
+                </a>
+              </li>
+            )}
             <li className="flex gap-2.5">
               <Mail className="h-4 w-4 shrink-0 text-accent" />
               <a href={`mailto:${siteConfig.contact.email}`} className="hover:text-accent">

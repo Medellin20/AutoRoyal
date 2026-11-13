@@ -4,15 +4,15 @@
 
 @layer base {
   :root {
-    /* Palette claire AutoRoyal - modifiable depuis src/config/site.ts */
-    --color-ink: 20 32 58;
-    --color-muted: 104 116 140;
+    /* Palette Laurent Crash Autos : rouge, noir et argent. */
+    --color-ink: 24 24 26;
+    --color-muted: 105 108 112;
     --color-canvas: 255 255 255;
-    --color-surface: 246 248 252;
-    --color-line: 226 232 240;
-    --color-accent: 47 91 234;
-    --color-accent-soft: 234 240 255;
-    --color-gold: 198 154 58;
+    --color-surface: 247 247 247;
+    --color-line: 222 224 226;
+    --color-accent: 237 28 36;
+    --color-accent-soft: 255 235 236;
+    --color-gold: 164 169 173;
     --color-success: 22 145 96;
     --color-warning: 200 138 20;
     --color-danger: 205 62 62;

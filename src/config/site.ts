@@ -3,26 +3,26 @@
  * Modifier ici : nom, logo, couleurs, coordonnees et reseaux sociaux.
  */
 export const siteConfig = {
-  name: 'AutoRoyal',
-  legalName: 'AutoRoyal SARL',
+  name: 'Laurent Crash Autos',
+  legalName: 'Laurent Crash Autos',
   tagline: 'Louez ou achetez votre prochaine voiture, sans mauvaise surprise.',
   description:
-    "AutoRoyal loue et vend des vehicules controles, livres propres, avec des tarifs affiches et un contrat clair.",
-  logo: '/images/logo.svg',
-  logoLight: '/images/logo.svg',
+    "Laurent Crash Autos loue et vend des vehicules controles, livres propres, avec des tarifs affiches et un contrat clair.",
+  logo: '/images/laurent-crash-autos.png',
+  logoLight: '/images/laurent-crash-autos.png',
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
   locale: 'fr_FR',
-  currency: 'XOF',
-  currencyLabel: 'FCFA',
+  currency: 'EUR',
+  currencyLabel: '€',
 
   contact: {
-    phone: '+229 01 97 00 00 00',
-    whatsapp: '2290197000000', // format international, sans + ni espaces
+    phone: '', // a renseigner avec le numero francais de l entreprise
+    whatsapp: '', // indicatif francais +33, sans + ni espaces
     email: 'contact@autoroyal.com',
-    address: 'Carrefour Tankpe, Abomey-Calavi, Benin',
+    address: 'France metropolitaine',
     hours: 'Lundi au samedi, 8h - 19h',
     mapEmbed:
-      'https://www.google.com/maps?q=Abomey-Calavi,Benin&output=embed',
+      'https://www.google.com/maps?q=France&output=embed',
   },
 
   social: {
@@ -32,30 +32,28 @@ export const siteConfig = {
     linkedin: 'https://linkedin.com/company/autoroyal',
   },
 
-  /** Palette claire. Modifier l'accent suffit a rehabiller le site. */
+  /** Palette Laurent Crash Autos : rouge, noir et argent. */
   theme: {
-    accent: '47 91 234', // bleu royal - rgb sans virgules
-    accentSoft: '234 240 255',
-    gold: '198 154 58',
-    ink: '20 32 58',
-    muted: '104 116 140',
+    accent: '237 28 36',
+    accentSoft: '255 235 236',
+    gold: '164 169 173',
+    ink: '24 24 26',
+    muted: '105 108 112',
     canvas: '255 255 255',
-    surface: '246 248 252',
-    line: '226 232 240',
+    surface: '247 247 247',
+    line: '222 224 226',
   },
 
   booking: {
     minDays: 1,
     maxDays: 90,
     /** Frais de dossier appliques a chaque location. */
-    serviceFee: 5000,
+    serviceFee: 8,
     /** Frais forfaitaires si le lieu de retour differe du lieu de retrait. */
-    differentReturnFee: 10000,
+    differentReturnFee: 15,
     pickupPlaces: [
-      'Agence Abomey-Calavi',
-      'Agence Cotonou Ganhi',
-      'Aeroport Cardinal Bernardin Gantin',
-      'Livraison a domicile',
+      'Lieu convenu en France metropolitaine',
+      'Autre lieu en France metropolitaine',
     ],
   },
 } as const

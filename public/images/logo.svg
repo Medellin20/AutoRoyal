@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" role="img" aria-label="AutoRoyal">
-  <rect x="0" y="6" width="36" height="36" rx="10" fill="#2F5BEA"/>
-  <text x="18" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#fff">AR</text>
-  <text x="46" y="30" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#14203A">AutoRoyal</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" role="img" aria-label="Laurent Crash Autos">
+  <rect width="520" height="120" rx="18" fill="#18181A"/>
+  <text x="26" y="61" font-family="system-ui, sans-serif" font-size="39" font-weight="700" font-style="italic" fill="#F4F4F4">LAURENT</text>
+  <text x="28" y="99" font-family="system-ui, sans-serif" font-size="25" font-weight="700" font-style="italic" letter-spacing="3" fill="#ED1C24">CRASH AUTOS</text>
 </svg>

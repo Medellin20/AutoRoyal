@@ -100,7 +100,7 @@ export function Advantages() {
     <section className="border-y border-line bg-surface py-20">
       <div className="shell">
         <SectionHeader
-          eyebrow="Pourquoi AutoRoyal"
+          eyebrow="Pourquoi Laurent Crash Autos"
           title="Ce que vous obtenez en passant par nous"
           description="Six engagements que nous tenons sur chaque dossier, en vente comme en location."
         />
@@ -193,11 +193,11 @@ export function Testimonials() {
 }
 
 export const faqItems = [
-  { q: 'Quels documents faut-il pour louer ?', a: "Une piece d'identite en cours de validité, un permis de conduire de plus de deux ans et un justificatif de domicile. La caution se regle par carte, virement ou mobile money." },
+  { q: 'Quels documents faut-il pour louer ?', a: "Une piece d'identite en cours de validite, un permis de conduire et un justificatif de domicile. Les conditions exactes sont confirmees au devis." },
   { q: 'La caution est-elle bloquée ?', a: "Elle est encaissee au depart et restituee sous 72 h apres le retour du vehicule, deduction faite d eventuels dommages constates a l etat des lieux." },
   { q: 'Puis-je faire expertiser un vehicule avant d acheter ?', a: "Oui. Vous pouvez venir avec votre mecanicien ou demander un essai routier sur rendez-vous, sans engagement." },
   { q: 'Proposez-vous un financement ?', a: "Nous travaillons avec deux partenaires bancaires. Indiquez-le dans votre demande d achat et un conseiller monte le dossier avec vous." },
-  { q: 'Le kilometrage est-il limite en location ?', a: "200 km par jour inclus, puis 150 FCFA par kilometre supplementaire. Les forfaits semaine et mois sont illimites dans le Grand Nokoue." },
+  { q: 'Le kilometrage est-il limite en location ?', a: "Le kilometrage inclus et le tarif des kilometres supplementaires sont precises sur chaque offre et au contrat." },
   { q: 'Que se passe-t-il en cas de panne ?', a: "Appelez l atelier : depannage sur place ou vehicule de remplacement sous 4 h pendant les heures d ouverture." },
 ]
 

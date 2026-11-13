@@ -1,4 +1,4 @@
-# AutoRoyal — plateforme de location et de vente de vehicules
+# Laurent Crash Autos — plateforme de location et de vente de vehicules
 
 Application Next.js (App Router) complete : catalogue public, reservation en ligne, demandes
 d'achat et espace d'administration protege.
@@ -19,7 +19,10 @@ Renseignez `.env` :
 
 | Variable | Role |
 | --- | --- |
-| `DATABASE_URL` | chaine de connexion PostgreSQL |
+| `DATABASE_URL` | URL Supabase pooler transactionnel, utilisee par Prisma Client |
+| `DIRECT_URL` | URL directe Supabase, utilisee par Prisma Migrate |
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | acces public a la Supabase Data API |
+| `SUPABASE_SERVICE_ROLE_KEY` | cle API privilegiee, serveur uniquement |
 | `NEXTAUTH_SECRET` | cle de signature des sessions (`openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | URL publique du site |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | compte super administrateur cree par le seed |
@@ -29,13 +32,24 @@ Renseignez `.env` :
 `ADMIN_PASSWORD` doit faire au moins 10 caracteres. Aucun mot de passe n'est ecrit en clair dans
 le code : le seed lit uniquement les variables d'environnement et stocke un hash bcrypt.
 
-## 2. Base de donnees
+## 2. Base de donnees Supabase
+
+Dans Supabase, creez un projet PostgreSQL puis recuperez les URL dans **Connect**. Placez le pooler
+transactionnel (port 6543) dans `DATABASE_URL` et la connexion directe (port 5432) dans
+`DIRECT_URL`. Si votre reseau ne peut pas joindre l endpoint direct IPv6, utilisez le pooler en mode
+session (port 5432) pour `DIRECT_URL`. Les deux URL doivent viser le meme projet.
+
+Les variables `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` servent a la Data API;
+`SUPABASE_SERVICE_ROLE_KEY` ne doit jamais etre exposee au navigateur. Prisma se connecte a Postgres
+avec `DATABASE_URL` et `DIRECT_URL`, pas avec ces cles API.
 
 ```bash
-npx prisma generate          # client Prisma
-npx prisma migrate dev --name init   # premiere migration (developpement)
-npm run db:seed              # 12 vehicules, 3 clients, reservations et demandes de demo
+npx prisma generate
+npm run db:deploy
 ```
+
+Le seed charge des donnees de demonstration mais commence par effacer les donnees existantes.
+Ne lancez `npm run db:seed` que sur une base vide de demonstration.
 
 En production :
 
@@ -96,10 +110,10 @@ src/
 
 - **Nom, coordonnees, reseaux, lieux de retrait, frais** : `src/config/site.ts`.
 - **Couleurs** : variables CSS dans `src/app/globals.css` (`--color-accent`, `--color-gold`, ...).
-  La palette est claire par defaut : fond blanc, surfaces gris tres clair, accent bleu royal,
-  touches dorees.
+  La palette est claire par defaut : fond blanc, surfaces gris tres clair, accent rouge, noir et argent,
+  touches argentees.
 - **Typographies** : `src/app/layout.tsx` (Sora pour les titres, Plus Jakarta Sans pour le texte).
-- **Logo** : `public/images/logo.svg` ou le composant `src/components/layout/logo.tsx`.
+- **Logo** : `public/images/laurent-crash-autos.png`, affiche par `src/components/layout/logo.tsx`.
 - Une partie de ces valeurs est aussi modifiable sans redeploiement depuis `/admin/parametres`.
 
 ## 6. Securite
@@ -131,8 +145,8 @@ src/
 
 1. Poussez le depot sur GitHub, puis importez-le dans Vercel.
 2. Ajoutez toutes les variables de `.env.example` dans *Settings → Environment Variables*.
-3. Utilisez une base PostgreSQL manageee (Neon, Supabase, Railway). Pour un environnement
-   serverless, ajoutez `?pgbouncer=true&connection_limit=1` a `DATABASE_URL`.
+3. Renseignez `DATABASE_URL` avec le pooler transactionnel Supabase et `DIRECT_URL` avec l URL
+   directe (ou le pooler en mode session pour les environnements IPv4 uniquement).
 4. Build : `npm run build` (execute `prisma generate`).
 5. Appliquez les migrations une fois : `npx prisma migrate deploy` (localement, pointe sur la base
    de production, ou via une commande de build).
@@ -157,51 +171,11 @@ controles, textes alternatifs sur toutes les images. Les animations respectent
 `prefers-reduced-motion`. Les images passent par `next/image` (AVIF/WebP), les listes lourdes
 utilisent Suspense et des skeletons.
 
-## 10. Configuration locale (exécution rapide avec Docker)
+## 10. Configuration Supabase en local
 
-Pour démarrer rapidement une base PostgreSQL locale et configurer DATABASE_URL :
-
-1. Copier l'exemple d'environnement :
-
-```bash
-cp .env.example .env
-```
-
-2. Démarrer Postgres via Docker Compose (fichier `docker-compose.yml` à la racine fourni) :
-
-```bash
-docker compose up -d
-```
-
-Le compose démarre Postgres (port 5432) et Adminer (interface web à http://localhost:8080).
-
-3. Exemple de chaîne de connexion à placer dans `.env` (déjà présente dans `.env.example`) :
-
-```env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/autoroyal?schema=public"
-```
-
-Si le mot de passe contient des caractères spéciaux, conservez les guillemets ou encodez-les.
-
-4. Générer le client Prisma, appliquer les migrations et lancer le seed de démonstration :
-
-```bash
-npx prisma generate
-npx prisma migrate dev --name init
-npm run db:seed
-```
-
-5. Lancer l'application :
-
-```bash
-npm run dev
-# ou pour la production :
-# npm run build && npm start
-```
-
-Notes :
-
-- Adminer (http://localhost:8080) : System=PostgreSQL, Server=db, Username=postgres, Password=password, Database=autoroyal
-- Le fichier `docker-compose.yml` fourni est minimal et destiné au développement local. Adaptez les mots de passe et volumes pour un usage en production.
-- Si vous préférez utiliser un service managé (Supabase, Neon, Railway), copiez la DATABASE_URL fournie par le service dans `.env`.
+Copiez `.env.example` vers `.env`, renseignez les URL `DATABASE_URL` et `DIRECT_URL` depuis le
+tableau de bord Supabase, puis définissez `ADMIN_EMAIL` et `ADMIN_PASSWORD` avant de créer un
+compte administrateur. Une clé `NEXTAUTH_SECRET` locale peut être generee avec
+`openssl rand -base64 32`. Ensuite, appliquez les migrations avec `npm run db:deploy` et lancez
+`npm run dev`. Le fichier `.env` local est ignore par Git.
 

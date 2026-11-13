@@ -16,7 +16,7 @@ export function Hero() {
       <div className="shell relative grid items-center gap-12 pb-16 lg:grid-cols-[1fr_1.1fr] lg:pb-24">
         <div>
           <Reveal>
-            <p className="eyebrow">Vente et location a {siteConfig.contact.address.split(',')[1]?.trim() ?? 'Cotonou'}</p>
+            <p className="eyebrow">Vente et location en France</p>
             <div className="rule-gold mt-4" />
           </Reveal>
 
@@ -72,7 +72,7 @@ export function Hero() {
           <div className="relative aspect-[5/4] overflow-hidden rounded-card bg-surface shadow-lift lg:aspect-[4/3]">
             <Image
               src="/images/hero.svg"
-              alt="Vehicule prepare dans l atelier AutoRoyal"
+              alt="Vehicule prepare dans l atelier Laurent Crash Autos"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
@@ -81,7 +81,7 @@ export function Hero() {
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-line bg-white/95 p-4 backdrop-blur">
               <p className="text-xs uppercase tracking-[0.16em] text-muted">Disponible aujourd&apos;hui</p>
               <p className="mt-1 font-display text-base font-semibold">
-                Livraison a domicile sous 24 h dans le Grand Nokoue
+                Livraison en France metropolitaine, selon le devis
               </p>
             </div>
           </div>

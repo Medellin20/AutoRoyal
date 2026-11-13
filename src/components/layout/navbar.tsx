@@ -69,13 +69,15 @@ export function Navbar() {
           >
             <Heart className="h-5 w-5" />
           </Link>
-          <a
-            href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}
-            className="flex items-center gap-2 rounded-pill px-3 py-2 text-sm text-ink/75 hover:text-ink"
-          >
-            <Phone className="h-4 w-4" />
-            {siteConfig.contact.phone}
-          </a>
+          {siteConfig.contact.phone && (
+            <a
+              href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`}
+              className="flex items-center gap-2 rounded-pill px-3 py-2 text-sm text-ink/75 hover:text-ink"
+            >
+              <Phone className="h-4 w-4" />
+              {siteConfig.contact.phone}
+            </a>
+          )}
           <ButtonLink href="/vehicules" size="sm">
             Voir les vehicules
           </ButtonLink>

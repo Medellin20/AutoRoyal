@@ -26,7 +26,7 @@ export default function Page() {
         {
           title: '2. Duree et restitution',
           body: [
-            "La location court de la date et heure de depart indiquees au contrat jusqu a la restitution effective du vehicule a l agence convenue.",
+            "La location court de la date et heure de depart indiquees au contrat jusqu a la restitution du vehicule au lieu convenu en France metropolitaine.",
             "Tout retard superieur a une heure entraine la facturation d une journee supplementaire au tarif journalier en vigueur.",
           ],
         },
@@ -53,13 +53,13 @@ export default function Page() {
         {
           title: '6. Interdictions',
           body: [
-            "Sont interdits : la sous-location, le transport de marchandises dangereuses, la participation a des competitions, la conduite hors des routes carrossables et la sortie du territoire national sans autorisation ecrite.",
+            "Sont interdits : la sous-location, le transport de marchandises dangereuses, la participation a des competitions et la conduite hors des routes carrossables. Tout trajet hors de France doit etre autorise par ecrit au prealable.",
           ],
         },
         {
           title: '7. Panne et assistance',
           body: [
-            `En cas d immobilisation, contactez l atelier au ${siteConfig.contact.phone}. Un depannage ou un vehicule de remplacement est mis en place sous quatre heures pendant les heures d ouverture.`,
+            `En cas d immobilisation, contactez Laurent Crash Autos au ${siteConfig.contact.phone || siteConfig.contact.email} pour connaitre les modalites d assistance.`,
           ],
         },
         {

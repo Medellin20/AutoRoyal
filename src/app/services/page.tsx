@@ -16,7 +16,7 @@ const services = [
   { icon: CarFront, title: 'Location longue duree', text: "A partir d un mois, entretien et revisions pris en charge. Facturation mensuelle detaillee." },
   { icon: FileSignature, title: 'Vente de vehicules revises', text: "Controle 42 points, garantie 6 mois moteur et boite, papiers remis le jour de la livraison." },
   { icon: Users, title: 'Mise a disposition avec chauffeur', text: "Chauffeur experimente pour vos deplacements professionnels ou vos evenements." },
-  { icon: Truck, title: 'Livraison et reprise', text: "Livraison sous 24 h dans le Grand Nokoue, etat des lieux signe sur place." },
+  { icon: Truck, title: 'Livraison et reprise', text: "Livraison en France metropolitaine. Pour une destination europeenne, contactez-nous afin d obtenir un devis." },
   { icon: Wrench, title: 'Entretien et depannage', text: "Atelier integre. En location, vehicule de remplacement sous 4 h en cas d immobilisation." },
 ]
 

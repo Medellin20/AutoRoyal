@@ -19,9 +19,9 @@ export default function Page() {
         {
           title: 'Editeur du site',
           body: [
-            `${siteConfig.legalName}, societe specialisee dans la location et la vente de vehicules.`,
-            `Siege : ${siteConfig.contact.address}. Telephone : ${siteConfig.contact.phone}. E-mail : ${siteConfig.contact.email}.`,
-            'Numero d immatriculation et identifiant fiscal a completer avant mise en production.',
+            `${siteConfig.legalName}, editeur de ce site consacre a la location et a la vente de vehicules.`,
+            `Adresse du siege social : a renseigner. Zone desservie : ${siteConfig.contact.address}. Telephone : ${siteConfig.contact.phone || 'a renseigner'}. E-mail : ${siteConfig.contact.email}.`,
+            'Forme juridique, numero d immatriculation, identifiant fiscal, directeur de publication et coordonnees de l hebergeur a completer avant mise en production.',
           ],
         },
         {

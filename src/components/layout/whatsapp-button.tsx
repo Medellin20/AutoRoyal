@@ -8,6 +8,8 @@ import { whatsappLink } from '@/lib/utils'
 export function WhatsAppButton() {
   const reduced = useReducedMotion()
 
+  if (!siteConfig.contact.whatsapp) return null
+
   return (
     <motion.a
       href={whatsappLink(`Bonjour ${siteConfig.name}, je souhaite des informations sur vos vehicules.`)}

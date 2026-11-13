@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { AdminShell } from '@/components/admin/admin-shell'
+import { siteConfig } from '@/config/site'
 
 export const metadata = {
-  title: { default: 'Administration', template: '%s - Administration AutoRoyal' },
+  title: { default: 'Administration', template: `%s - Administration ${siteConfig.name}` },
   robots: { index: false, follow: false },
 }
 

@@ -11,7 +11,7 @@ export const purchaseSchema = z.object({
     .union([z.coerce.number().min(0), z.literal('')])
     .transform((v) => (v === '' ? null : Number(v)))
     .nullable(),
-  payment: z.enum(['CASH', 'VIREMENT', 'MOBILE_MONEY', 'FINANCEMENT']),
+  payment: z.enum(['CASH', 'VIREMENT', 'FINANCEMENT']),
   financing: z.boolean().default(false),
   tradeIn: z.boolean().default(false),
   tradeInInfo: z.string().max(300).optional().or(z.literal('')),

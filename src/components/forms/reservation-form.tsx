@@ -185,7 +185,7 @@ export function ReservationForm({
             </Field>
 
             <Field label="Telephone" htmlFor="phone" required error={errors.phone?.[0]}>
-              <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="+229 ..." required />
+              <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="Ex. +33 6 XX XX XX XX" required />
             </Field>
           </div>
 

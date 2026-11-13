@@ -16,7 +16,7 @@ const milestones = [
   { year: '2016', title: 'Un atelier, deux mecaniciens', text: "Nous reparions les vehicules des autres. C'est la que nous avons appris à reconnaitre une bonne occasion d'une mauvaise." },
   { year: '2019', title: 'Premiere flotte de location', text: "Six vehicules, entretenus dans notre propre atelier. Le principe n a pas change depuis." },
   { year: '2022', title: 'Ouverture du parc de vente', text: "Chaque vehicule passe le controle 42 points avant d'etre expose. Ce qui ne passe pas ne se vend pas." },
-  { year: '2025', title: 'Livraison a domicile', text: "Le Grand Nokoue livre en 24 h, avec etat des lieux signe sur place." },
+  { year: '2025', title: 'Livraison en France', text: "Les modalites de livraison sont convenues avec le client et precisees au devis." },
 ]
 
 export default function AboutPage() {
@@ -49,7 +49,7 @@ export default function AboutPage() {
             <div className="relative aspect-[4/3] overflow-hidden rounded-card shadow-lift">
               <Image
                 src="/images/about.svg"
-                alt="Atelier AutoRoyal"
+                alt="Atelier Laurent Crash Autos"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

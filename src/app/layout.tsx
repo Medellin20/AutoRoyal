@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: ['location voiture', 'vente voiture', 'garage', siteConfig.name, 'Benin'],
+  keywords: ['location voiture', 'vente voiture', 'garage', siteConfig.name, 'France', 'Europe'],
   openGraph: {
     type: 'website',
     locale: siteConfig.locale,
@@ -33,12 +33,14 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: `${siteConfig.name} - Location et vente de vehicules`,
     description: siteConfig.description,
+    images: [{ url: siteConfig.logo, width: 1272, height: 530, alt: siteConfig.name }],
   },
+  twitter: { card: 'summary_large_image', images: [siteConfig.logo] },
   robots: { index: true, follow: true },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  themeColor: '#ED1C24',
   width: 'device-width',
   initialScale: 1,
 }

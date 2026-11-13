@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------- Enums
@@ -254,7 +255,7 @@ model ContactMessage {
 
 model SiteSetting {
   id          String   @id @default("default")
-  garageName  String   @default("AutoRoyal")
+  garageName  String   @default("Laurent Crash Autos")
   tagline     String?
   phone       String?
   whatsapp    String?
@@ -265,7 +266,7 @@ model SiteSetting {
   instagram   String?
   tiktok      String?
   linkedin    String?
-  accentColor String   @default("#2F5BEA")
+  accentColor String   @default("#ED1C24")
   updatedAt   DateTime @updatedAt
 }
 

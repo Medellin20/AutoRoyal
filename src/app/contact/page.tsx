@@ -7,14 +7,14 @@ import { buildMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = buildMetadata({
   title: 'Contact',
-  description: `Joindre ${siteConfig.name} par telephone, e-mail ou WhatsApp. Agence ouverte du lundi au samedi.`,
+  description: `Contacter ${siteConfig.name} pour une demande concernant la France metropolitaine ou l Europe.`,
   path: '/contact',
 })
 
 export default function ContactPage() {
   const details = [
-    { icon: MapPin, label: 'Adresse', value: siteConfig.contact.address },
-    { icon: Phone, label: 'Telephone', value: siteConfig.contact.phone, href: `tel:${siteConfig.contact.phone.replace(/\s/g, '')}` },
+    { icon: MapPin, label: 'Zone desservie', value: siteConfig.contact.address },
+    ...(siteConfig.contact.phone ? [{ icon: Phone, label: 'Telephone', value: siteConfig.contact.phone, href: `tel:${siteConfig.contact.phone.replace(/\s/g, '')}` }] : []),
     { icon: Mail, label: 'E-mail', value: siteConfig.contact.email, href: `mailto:${siteConfig.contact.email}` },
     { icon: Clock, label: 'Horaires', value: siteConfig.contact.hours },
   ]
