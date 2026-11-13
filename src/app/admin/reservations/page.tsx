@@ -35,9 +35,12 @@ export default async function AdminReservationsPage({
   const search = searchParams.q?.toLowerCase()
   const reservations = ((reservationsResult.data ?? []) as Reservation[])
     .filter((row) => !searchParams.status || row.status === searchParams.status)
-    .map((row) => ({ ...row, customer: customerMap.get(row.customerId), vehicle: vehicleMap.get(row.vehicleId) }))
-    .filter((row) => row.customer && row.vehicle)
-    .filter((row) => !search || [row.reference, row.customer!.fullName, row.customer!.phone, row.vehicle!.brand, row.vehicle!.model].some((value) => value.toLowerCase().includes(search)))
+    .flatMap((row) => {
+      const customer = customerMap.get(row.customerId)
+      const vehicle = vehicleMap.get(row.vehicleId)
+      return customer && vehicle ? [{ ...row, customer, vehicle }] : []
+    })
+    .filter((row) => !search || [row.reference, row.customer.fullName, row.customer.phone, row.vehicle.brand, row.vehicle.model].some((value) => value.toLowerCase().includes(search)))
 
   const filters = [
     { label: 'Toutes', value: '' },

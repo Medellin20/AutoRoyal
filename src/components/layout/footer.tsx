@@ -55,7 +55,7 @@ export function Footer() {
             {siteConfig.contact.phone && (
               <li className="flex gap-2.5">
                 <Phone className="h-4 w-4 shrink-0 text-accent" />
-                <a href={`tel:${siteConfig.contact.phone.replace(/\s/g, '')}`} className="hover:text-accent">
+                <a href={`tel:${String(siteConfig.contact.phone).replace(/\s/g, '')}`} className="hover:text-accent">
                   {siteConfig.contact.phone}
                 </a>
               </li>

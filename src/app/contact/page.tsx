@@ -14,7 +14,7 @@ export const metadata: Metadata = buildMetadata({
 export default function ContactPage() {
   const details = [
     { icon: MapPin, label: 'Zone desservie', value: siteConfig.contact.address },
-    ...(siteConfig.contact.phone ? [{ icon: Phone, label: 'Telephone', value: siteConfig.contact.phone, href: `tel:${siteConfig.contact.phone.replace(/\s/g, '')}` }] : []),
+    ...(siteConfig.contact.phone ? [{ icon: Phone, label: 'Telephone', value: siteConfig.contact.phone, href: `tel:${String(siteConfig.contact.phone).replace(/\s/g, '')}` }] : []),
     { icon: Mail, label: 'E-mail', value: siteConfig.contact.email, href: `mailto:${siteConfig.contact.email}` },
     { icon: Clock, label: 'Horaires', value: siteConfig.contact.hours },
   ]

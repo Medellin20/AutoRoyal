@@ -1,19 +1,25 @@
 import type { Metadata, Viewport } from 'next'
-import { Sora, Plus_Jakarta_Sans } from 'next/font/google'
+import localFont from 'next/font/local'
 import { Toaster } from 'sonner'
 import { siteConfig } from '@/config/site'
 import './globals.css'
 
-const display = Sora({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
+const display = localFont({
+  src: [
+    { path: '../../public/fonts/sora-500.ttf', weight: '500' },
+    { path: '../../public/fonts/sora-600.ttf', weight: '600' },
+    { path: '../../public/fonts/sora-700.ttf', weight: '700' },
+  ],
   variable: '--font-display',
   display: 'swap',
 })
 
-const body = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+const body = localFont({
+  src: [
+    { path: '../../public/fonts/plus-jakarta-sans-400.ttf', weight: '400' },
+    { path: '../../public/fonts/plus-jakarta-sans-500.ttf', weight: '500' },
+    { path: '../../public/fonts/plus-jakarta-sans-600.ttf', weight: '600' },
+  ],
   variable: '--font-body',
   display: 'swap',
 })
