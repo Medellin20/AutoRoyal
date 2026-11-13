@@ -20,7 +20,7 @@ export default async function HomePage() {
     <PublicShell>
       <Hero />
 
-      <section className="shell -mt-8 pb-4 lg:-mt-12">
+      <section className="shell relative z-10 -mt-8 pb-4 lg:-mt-12">
         <Suspense fallback={<div className="h-32 rounded-card border border-line bg-white" />}>
           <SearchFilters brands={options.brands} years={options.years} compact />
         </Suspense>

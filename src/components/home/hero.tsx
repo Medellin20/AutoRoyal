@@ -15,9 +15,9 @@ export function Hero() {
         aria-hidden
         className="-z-20 object-cover object-[72%_center] sm:object-[65%_center]"
       />
-      <div aria-hidden className="absolute inset-0 -z-10 bg-black/35" />
-      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-black/95 via-black/80 to-black/35 max-lg:from-black/90 max-lg:via-black/75 max-lg:to-black/65" />
-      <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-black/10" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-black/85 via-black/45 to-transparent max-lg:from-black/90 max-lg:via-black/65 max-lg:to-black/35" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-black/25 to-transparent" />
 
       <div className="shell relative flex min-h-[620px] items-center py-14 sm:min-h-[660px] lg:min-h-[700px] lg:py-20">
         <div className="max-w-2xl">
