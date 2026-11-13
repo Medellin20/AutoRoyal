@@ -38,7 +38,10 @@ Créez le premier compte administrateur après avoir renseigné `ADMIN_EMAIL` et
 npm run admin:create
 ```
 
-Cette commande ajoute un compte super administrateur sans effacer de données existantes.
+La commande crée le compte dans Supabase Auth et son profil de rôle. Pour utiliser un compte créé
+manuellement dans **Supabase → Authentication → Users**, définissez `ADMIN_EMAIL` avec exactement
+son adresse dans les variables d'environnement de l'application. Seuls les identifiants validés par
+Supabase Auth peuvent ouvrir une session.
 
 ## Lancer le site
 

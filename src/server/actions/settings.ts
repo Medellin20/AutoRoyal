@@ -1,8 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import bcrypt from 'bcryptjs'
-import { getSupabaseAdmin, newId } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { settingsSchema } from '@/validations/contact'
 import { userSchema } from '@/validations/auth'
 import { requireAdmin } from '@/lib/auth'
@@ -56,11 +55,23 @@ export async function createAdminUser(formData: FormData): Promise<ActionResult>
   if (lookupError) return { ok: false, message: 'Verification du compte impossible.' }
   if (exists) return { ok: false, message: 'Cette adresse est deja utilisee.' }
 
+  const { data: authResult, error: authError } = await db.auth.admin.createUser({
+    email,
+    password: parsed.data.password,
+    email_confirm: true,
+    user_metadata: { name: parsed.data.name },
+    app_metadata: { role: parsed.data.role },
+  })
+  if (authError || !authResult.user) return { ok: false, message: 'Creation du compte Supabase Auth impossible.' }
+
   const { data: created, error } = await db.from('users').insert({
-    id: newId(), name: parsed.data.name, email,
-    passwordHash: await bcrypt.hash(parsed.data.password, 12), role: parsed.data.role,
+    id: authResult.user.id, name: parsed.data.name, email,
+    passwordHash: 'managed-by-supabase-auth', role: parsed.data.role,
   }).select('id').single()
-  if (error || !created) return { ok: false, message: 'Creation du compte impossible.' }
+  if (error || !created) {
+    await db.auth.admin.deleteUser(authResult.user.id)
+    return { ok: false, message: 'Creation du profil administrateur impossible.' }
+  }
 
   await logAudit({
     userId: current.id,

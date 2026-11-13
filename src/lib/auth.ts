@@ -1,12 +1,9 @@
 import type { NextAuthOptions, DefaultSession } from 'next-auth'
 import { getServerSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
-import { headers } from 'next/headers'
-import { getSupabaseAdmin } from '@/lib/supabase'
-import { isLoginBlocked, recordLoginAttempt } from '@/lib/rate-limit'
+import { getSupabaseAdmin, getSupabasePublic } from '@/lib/supabase'
 import { loginSchema } from '@/validations/auth'
-import type { Role, User } from '@/types/database'
+import type { Role } from '@/types/database'
 
 declare module 'next-auth' {
   interface Session {
@@ -54,38 +51,39 @@ export const authOptions: NextAuthOptions = {
         if (!parsed.success) throw new Error('Identifiants invalides.')
 
         const { email, password } = parsed.data
-        const ip =
-          headers().get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'inconnue'
+        // Supabase Auth owns password validation and its own abuse protection.
+        const { data: authData, error: authError } = await getSupabasePublic().auth.signInWithPassword({
+          email: email.toLowerCase(),
+          password,
+        })
+        if (authError || !authData.user) throw new Error('Identifiants invalides.')
 
-        if (await isLoginBlocked(email, ip)) {
-          throw new Error('Trop de tentatives. Reessayez dans 15 minutes.')
+        const userEmail = authData.user.email?.toLowerCase() ?? email.toLowerCase()
+        const { data: profile, error: profileError } = await getSupabaseAdmin()
+          .from('users').select('id,name,role,active').eq('email', userEmail).maybeSingle()
+        if (profileError) throw profileError
+
+        const metadataRole = authData.user.app_metadata?.role
+        const role = (['SUPER_ADMIN', 'ADMIN', 'MANAGER'].includes(metadataRole)
+          ? metadataRole
+          : profile?.role) as Role | undefined
+        const isConfiguredAdmin = userEmail === process.env.ADMIN_EMAIL?.trim().toLowerCase()
+        if ((profile && !profile.active) || (!role && !isConfiguredAdmin)) {
+          throw new Error('Ce compte ne dispose pas des droits administrateur.')
         }
 
-        const { data: userRow, error: userError } = await getSupabaseAdmin()
-          .from('users')
-          .select('*')
-          .eq('email', email.toLowerCase())
-          .maybeSingle()
-        if (userError) throw userError
-        const user = userRow as User | null
-
-        if (!user || !user.active) {
-          await recordLoginAttempt(email, ip, false)
-          throw new Error('Identifiants invalides.')
+        if (profile) {
+          const { error: updateError } = await getSupabaseAdmin().from('users')
+            .update({ lastLoginAt: new Date().toISOString() }).eq('id', profile.id)
+          if (updateError) console.error('[auth] could not update last login')
         }
 
-        const valid = await bcrypt.compare(password, user.passwordHash)
-        if (!valid) {
-          await recordLoginAttempt(email, ip, false)
-          throw new Error('Identifiants invalides.')
+        return {
+          id: profile?.id ?? authData.user.id,
+          name: profile?.name ?? authData.user.user_metadata?.name ?? userEmail,
+          email: userEmail,
+          role: role ?? 'SUPER_ADMIN',
         }
-
-        await recordLoginAttempt(email, ip, true)
-        const { error: updateError } = await getSupabaseAdmin().from('users')
-          .update({ lastLoginAt: new Date().toISOString() }).eq('id', user.id)
-        if (updateError) throw updateError
-
-        return { id: user.id, name: user.name, email: user.email, role: user.role }
       },
     }),
   ],

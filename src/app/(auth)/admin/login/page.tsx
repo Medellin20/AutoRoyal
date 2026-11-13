@@ -29,7 +29,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted">
-          Apres cinq echecs, l&apos;acces est bloque 15 minutes.
+          Connectez-vous avec un compte administrateur Supabase Auth.
         </p>
       </div>
     </main>

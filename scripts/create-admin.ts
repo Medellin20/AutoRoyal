@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { createClient } from '@supabase/supabase-js'
 import { loadEnvConfig } from '@next/env'
-import { randomUUID } from 'node:crypto'
 
 loadEnvConfig(process.cwd())
 
@@ -32,9 +31,18 @@ async function createAdmin() {
   if (lookupError) throw lookupError
   if (existingUser) throw new Error(`Un compte existe déjà pour ${email}.`)
 
+  const { data: authResult, error: authError } = await supabase.auth.admin.createUser({
+    email: email!,
+    password: password!,
+    email_confirm: true,
+    user_metadata: { name },
+    app_metadata: { role: 'SUPER_ADMIN' },
+  })
+  if (authError || !authResult.user) throw authError ?? new Error('Création Supabase Auth impossible.')
+
   const passwordHash = await bcrypt.hash(password!, 12)
   const { error: insertError } = await supabase.from('users').insert({
-    id: randomUUID(),
+    id: authResult.user.id,
     name,
     email: email!,
     passwordHash,
@@ -42,7 +50,10 @@ async function createAdmin() {
     active: true,
   })
 
-  if (insertError) throw insertError
+  if (insertError) {
+    await supabase.auth.admin.deleteUser(authResult.user.id)
+    throw insertError
+  }
   console.log(`Compte super administrateur créé pour ${email}.`)
 }
 
