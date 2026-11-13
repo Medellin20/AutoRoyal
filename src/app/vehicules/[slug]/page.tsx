@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import {
-  Armchair, Calendar, DoorOpen, Fuel, Gauge, MessageCircle, Palette, Settings2, Zap, FileText, ShieldCheck,
+  Armchair, Calendar, DoorOpen, Fuel, Gauge, MessageCircle, Palette, Settings2, Zap, ShieldCheck,
 } from 'lucide-react'
 import { PublicShell } from '@/components/layout/public-shell'
 import { Gallery } from '@/components/vehicles/gallery'
@@ -16,6 +16,7 @@ import { incrementVehicleViews } from '@/server/actions/vehicle'
 import { formatPrice, formatNumber, whatsappLink } from '@/lib/utils'
 import {
   categoryLabels, fuelLabels, transmissionLabels, vehicleStatusLabels, vehicleStatusTone,
+  damageLevelLabels, runningConditionLabels,
 } from '@/lib/labels'
 import { siteConfig } from '@/config/site'
 import { buildMetadata } from '@/lib/seo'
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const vehicle = await getVehicleBySlug(params.slug)
   if (!vehicle) return buildMetadata({ title: 'Vehicule introuvable', path: `/vehicules/${params.slug}` })
 
-  const title = `${vehicle.brand} ${vehicle.model} ${vehicle.year}`
+  const title = vehicle.title || `${vehicle.brand} ${vehicle.model} ${vehicle.year}`
   const main = vehicle.images.find((i) => i.isMain) ?? vehicle.images[0]
 
   return buildMetadata({
@@ -44,9 +45,7 @@ export default async function VehiclePage({ params }: { params: { slug: string }
   const similar = await getSimilarVehicles(vehicle.id, vehicle.category)
   await incrementVehicleViews(vehicle.id)
 
-  const title = `${vehicle.brand} ${vehicle.model}`
-  const canRent = vehicle.offerType !== 'SALE'
-  const canBuy = vehicle.offerType !== 'RENT'
+  const title = vehicle.title || `${vehicle.brand} ${vehicle.model}`
   const available = vehicle.status === 'AVAILABLE'
 
   const specs = [
@@ -58,12 +57,16 @@ export default async function VehiclePage({ params }: { params: { slug: string }
     { icon: Armchair, label: 'Places', value: String(vehicle.seats) },
     { icon: DoorOpen, label: 'Portes', value: String(vehicle.doors) },
     { icon: Zap, label: 'Puissance', value: `${vehicle.power} ch` },
+    { icon: Settings2, label: 'Motorisation', value: vehicle.engine },
+    { icon: Gauge, label: 'Cylindrée', value: vehicle.displacement ? `${formatNumber(vehicle.displacement)} cm³` : 'Non précisée' },
+    { icon: Armchair, label: 'Nombre de clés', value: String(vehicle.keysCount) },
+    { icon: Palette, label: 'Localisation', value: `${vehicle.city}, ${vehicle.country}` },
   ]
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Car',
-    name: `${title} ${vehicle.year}`,
+    name: title,
     brand: { '@type': 'Brand', name: vehicle.brand },
     model: vehicle.model,
     vehicleModelDate: String(vehicle.year),
@@ -74,7 +77,7 @@ export default async function VehiclePage({ params }: { params: { slug: string }
       offers: {
         '@type': 'Offer',
         price: Number(vehicle.salePrice),
-        priceCurrency: siteConfig.currency,
+        priceCurrency: vehicle.currency || siteConfig.currency,
         availability: available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       },
     }),
@@ -111,11 +114,35 @@ export default async function VehiclePage({ params }: { params: { slug: string }
             </Reveal>
 
             <Reveal className="mt-10">
+              <h2 className="font-display text-xl font-semibold">État après accident</h2>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Badge tone="warning">{damageLevelLabels[vehicle.damageLevel] ?? 'État à préciser'}</Badge>
+                <Badge tone="neutral">{runningConditionLabels[vehicle.runningCondition] ?? 'À vérifier'}</Badge>
+              </div>
+              {vehicle.damageTypes?.length > 0 && (
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {vehicle.damageTypes.map((damage) => <li key={damage} className="rounded-pill bg-surface px-3 py-1.5 text-sm">{damage}</li>)}
+                </ul>
+              )}
+              <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink/85">{vehicle.damageDescription}</p>
+              <p className="mt-3 text-sm text-muted">Carrosserie : {vehicle.bodyCondition.toLowerCase()} · Titre : {vehicle.titleStatus.toLowerCase()}</p>
+            </Reveal>
+
+            <Reveal className="mt-10">
               <h2 className="font-display text-xl font-semibold">Description</h2>
               <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink/85">
                 {vehicle.description}
               </p>
             </Reveal>
+
+            {vehicle.requiredDocuments.length > 0 && (
+              <Reveal className="mt-10">
+                <h2 className="font-display text-xl font-semibold">Documents et rapports disponibles</h2>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {vehicle.requiredDocuments.map((document) => <li key={document} className="rounded-pill bg-surface px-3 py-1.5 text-sm">{document}</li>)}
+                </ul>
+              </Reveal>
+            )}
 
             {vehicle.features.length > 0 && (
               <Reveal className="mt-10">
@@ -131,27 +158,6 @@ export default async function VehiclePage({ params }: { params: { slug: string }
               </Reveal>
             )}
 
-            {canRent && vehicle.rentalConditions && (
-              <Reveal className="mt-10 rounded-card border border-line bg-surface p-6">
-                <h2 className="font-display text-xl font-semibold">Conditions de location</h2>
-                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">
-                  {vehicle.rentalConditions}
-                </p>
-                {vehicle.requiredDocuments.length > 0 && (
-                  <>
-                    <h3 className="mt-6 text-sm font-semibold">Documents a fournir</h3>
-                    <ul className="mt-3 space-y-2">
-                      {vehicle.requiredDocuments.map((doc) => (
-                        <li key={doc} className="flex items-center gap-2.5 text-sm text-muted">
-                          <FileText className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-                          {doc}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </Reveal>
-            )}
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -170,57 +176,25 @@ export default async function VehiclePage({ params }: { params: { slug: string }
               </p>
 
               <div className="mt-6 space-y-4 border-t border-line pt-6">
-                {canBuy && (
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted">Prix de vente</span>
-                    <span className="font-display text-2xl font-semibold text-accent">
-                      {formatPrice(vehicle.salePrice as never)}
-                    </span>
-                  </div>
-                )}
-
-                {canRent && (
-                  <dl className="space-y-2 rounded-2xl bg-surface p-4 text-sm">
-                    <div className="flex justify-between">
-                      <dt className="text-muted">Par jour</dt>
-                      <dd className="font-medium">{formatPrice(vehicle.dailyPrice as never)}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-muted">Par semaine</dt>
-                      <dd className="font-medium">{formatPrice(vehicle.weeklyPrice as never)}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-muted">Par mois</dt>
-                      <dd className="font-medium">{formatPrice(vehicle.monthlyPrice as never)}</dd>
-                    </div>
-                    {vehicle.deposit && (
-                      <div className="flex justify-between border-t border-line pt-2">
-                        <dt className="text-muted">Caution</dt>
-                        <dd className="font-medium">{formatPrice(vehicle.deposit as never)}</dd>
-                      </div>
-                    )}
-                  </dl>
-                )}
+                <div className="flex items-baseline justify-between">
+                  <span className="text-sm text-muted">Prix de vente</span>
+                  <span className="font-display text-2xl font-semibold text-accent">
+                  {formatPrice(vehicle.salePrice as never, vehicle.currency)}
+                  </span>
+                </div>
               </div>
+              <p className="mt-2 text-right text-xs text-muted">{vehicle.quantity} disponible(s) · {vehicle.internationalSale ? 'Vente internationale possible' : 'Vente locale'}</p>
+              {vehicle.videoUrl && <a className="mt-4 inline-flex text-sm font-medium text-accent underline" href={vehicle.videoUrl} target="_blank" rel="noreferrer">Voir la vidéo du véhicule</a>}
 
               <div className="mt-6 space-y-3">
-                {canRent && (
-                  <ButtonLink
-                    href={`/reservation?vehicule=${vehicle.id}`}
-                    className="w-full"
-                    aria-disabled={!available}
-                  >
-                    Reserver ce vehicule
+                {available ? (
+                  <ButtonLink href={`/demande-achat?vehicule=${vehicle.id}`} className="w-full">
+                    Commander ce véhicule
                   </ButtonLink>
-                )}
-                {canBuy && (
-                  <ButtonLink
-                    href={`/demande-achat?vehicule=${vehicle.id}`}
-                    variant={canRent ? 'secondary' : 'primary'}
-                    className="w-full"
-                  >
-                    Demander a l&apos;acheter
-                  </ButtonLink>
+                ) : (
+                  <p className="rounded-xl bg-surface p-3 text-center text-sm text-muted">
+                    Ce véhicule n’est plus disponible à la commande.
+                  </p>
                 )}
                 <a
                   href={whatsappLink(`Bonjour, je suis interesse par le ${title} ${vehicle.year} (ref. ${vehicle.reference}).`)}

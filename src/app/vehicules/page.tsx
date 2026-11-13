@@ -13,7 +13,7 @@ import type { VehicleFilters } from '@/types'
 
 export const metadata: Metadata = buildMetadata({
   title: 'Catalogue des vehicules',
-  description: 'Tous les vehicules disponibles a la vente et a la location, avec kilometrage, carburant et tarifs affiches.',
+  description: 'Catalogue de véhicules accidentés à vendre en France et en Europe.',
   path: '/vehicules',
 })
 
@@ -52,9 +52,9 @@ export default async function VehiclesPage({
         <div className="shell">
           <p className="eyebrow">Catalogue</p>
           <div className="rule-gold mt-3" />
-          <h1 className="mt-5 font-display text-4xl font-semibold">Tous nos vehicules</h1>
+          <h1 className="mt-5 font-display text-4xl font-semibold">Véhicules accidentés à vendre</h1>
           <p className="mt-3 max-w-xl text-base text-muted">
-            Kilometrage reel, carburant, transmission et disponibilite affiches sur chaque fiche.
+            Consultez l’état, les dommages et les informations de chaque véhicule avant de commander.
           </p>
         </div>
       </section>

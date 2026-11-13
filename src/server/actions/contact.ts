@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin, newId } from '@/lib/supabase'
 import { contactSchema } from '@/validations/contact'
 import type { ActionResult } from '@/types'
 
@@ -16,15 +16,11 @@ export async function sendContactMessage(formData: FormData): Promise<ActionResu
     }
   }
 
-  await prisma.contactMessage.create({
-    data: {
-      fullName: parsed.data.fullName,
-      email: parsed.data.email.toLowerCase(),
-      phone: parsed.data.phone || null,
-      subject: parsed.data.subject,
-      message: parsed.data.message,
-    },
+  const { error } = await getSupabaseAdmin().from('contact_messages').insert({
+    id: newId(), fullName: parsed.data.fullName, email: parsed.data.email.toLowerCase(),
+    phone: parsed.data.phone || null, subject: parsed.data.subject, message: parsed.data.message,
   })
+  if (error) return { ok: false, message: 'Impossible d envoyer votre message pour le moment.' }
 
   revalidatePath('/admin')
   return { ok: true, message: 'Message envoye. Reponse sous 24 h ouvrees.' }

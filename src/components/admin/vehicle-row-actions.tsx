@@ -81,7 +81,7 @@ export function VehicleRowActions({
         }}
         loading={pending}
         title={`Supprimer ${label} ?`}
-        description="La fiche et ses photos sont effacees definitivement. Les reservations actives bloquent la suppression."
+        description="La fiche et ses photos sont effacées définitivement. Une commande existante bloque la suppression pour préserver l’historique."
       />
     </div>
   )

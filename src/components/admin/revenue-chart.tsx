@@ -6,8 +6,8 @@ import { formatPrice } from '@/lib/utils'
 export function RevenueChart({ data }: { data: { month: string; total: number }[] }) {
   return (
     <div className="rounded-card border border-line bg-white p-5 shadow-soft">
-      <h2 className="font-display text-lg font-semibold">Chiffre d&apos;affaires estime</h2>
-      <p className="mt-1 text-sm text-muted">Reservations confirmees, en cours et terminees, sur 6 mois.</p>
+      <h2 className="font-display text-lg font-semibold">Ventes confirmées</h2>
+      <p className="mt-1 text-sm text-muted">Montant des commandes dont le paiement a été vérifié, sur 6 mois.</p>
 
       <div className="mt-6 h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
-import { prisma } from '@/lib/prisma'
+import { getSupabasePublic } from '@/lib/supabase'
+import type { Vehicle } from '@/types/database'
+import { getPublicVehiclesWithImages } from '@/server/vehicle-data'
 import { PublicShell } from '@/components/layout/public-shell'
 import { FavoritesGrid } from '@/components/vehicles/favorites-grid'
 import { buildMetadata } from '@/lib/seo'
@@ -15,11 +17,9 @@ export const dynamic = 'force-dynamic'
 export default async function FavoritesPage() {
   // Les favoris sont stockes dans le navigateur : on charge le catalogue publie
   // et le filtrage se fait cote client.
-  const vehicles = await prisma.vehicle.findMany({
-    where: { published: true },
-    include: { images: { orderBy: { position: 'asc' } } },
-    orderBy: { createdAt: 'desc' },
-  })
+  const { data, error } = await getSupabasePublic().from('vehicles').select('*').eq('published', true).order('createdAt', { ascending: false })
+  if (error) throw new Error(error.message)
+  const vehicles = await getPublicVehiclesWithImages((data ?? []) as Vehicle[])
 
   return (
     <PublicShell>

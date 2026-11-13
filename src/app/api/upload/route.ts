@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin, newId } from '@/lib/supabase'
 import { uploadImage, ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE } from '@/lib/cloudinary'
 
 export const runtime = 'nodejs'
@@ -23,10 +23,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Aucun fichier recu.' }, { status: 400 })
   }
 
-  const vehicle = await prisma.vehicle.findUnique({
-    where: { id: vehicleId },
-    select: { id: true, brand: true, model: true, _count: { select: { images: true } } },
-  })
+  const db = getSupabaseAdmin()
+  const [{ data: vehicle, error: vehicleError }, { count, error: countError }] = await Promise.all([
+    db.from('vehicles').select('id,brand,model').eq('id', vehicleId).maybeSingle(),
+    db.from('vehicle_images').select('id', { count: 'exact', head: true }).eq('vehicleId', vehicleId),
+  ])
+  if (vehicleError || countError) return NextResponse.json({ message: 'Lecture du vehicule impossible.' }, { status: 500 })
   if (!vehicle) {
     return NextResponse.json({ message: 'Vehicule introuvable.' }, { status: 404 })
   }
@@ -49,20 +51,15 @@ export async function POST(request: Request) {
 
   try {
     const created = []
-    let position = vehicle._count.images
+    let position = count ?? 0
 
     for (const file of files) {
       const { url, publicId } = await uploadImage(file)
-      const image = await prisma.vehicleImage.create({
-        data: {
-          vehicleId,
-          url,
-          publicId,
-          alt: `${vehicle.brand} ${vehicle.model}`,
-          position,
-          isMain: position === 0,
-        },
-      })
+      const { data: image, error } = await db.from('vehicle_images').insert({
+        id: newId(), vehicleId, url, publicId, alt: `${vehicle.brand} ${vehicle.model}`,
+        position, isMain: position === 0,
+      }).select('*').single()
+      if (error || !image) throw error ?? new Error('Insertion de l image impossible.')
       created.push(image)
       position += 1
     }

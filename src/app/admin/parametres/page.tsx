@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { auth } from '@/lib/auth'
 import { can } from '@/lib/permissions'
 import { PageHeader } from '@/components/admin/page-header'
@@ -6,6 +6,7 @@ import { SettingsForm } from '@/components/admin/settings-form'
 import { UserManager } from '@/components/admin/user-manager'
 import { formatDateTime } from '@/lib/utils'
 import { siteConfig } from '@/config/site'
+import type { SiteSetting, User } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Parametres' }
@@ -14,15 +15,18 @@ export default async function SettingsPage() {
   const session = await auth()
   const isSuperAdmin = can(session?.user.role, 'user:manage')
 
-  const [settings, users, logs] = await Promise.all([
-    prisma.siteSetting.findUnique({ where: { id: 'default' } }),
-    isSuperAdmin
-      ? prisma.user.findMany({ orderBy: { createdAt: 'asc' } })
-      : Promise.resolve([]),
+  const db = getSupabaseAdmin()
+  const [settingsResult, usersResult, logsResult] = await Promise.all([
+    db.from('site_settings').select('*').eq('id', 'default').maybeSingle(),
+    isSuperAdmin ? db.from('users').select('*').order('createdAt') : Promise.resolve({ data: [], error: null }),
     can(session?.user.role, 'audit:read')
-      ? prisma.auditLog.findMany({ take: 15, orderBy: { createdAt: 'desc' } })
-      : Promise.resolve([]),
+      ? db.from('audit_logs').select('id,userEmail,action,entity,createdAt').order('createdAt', { ascending: false }).limit(15)
+      : Promise.resolve({ data: [], error: null }),
   ])
+  if (settingsResult.error || usersResult.error || logsResult.error) throw new Error('Lecture des parametres impossible.')
+  const settings = settingsResult.data as SiteSetting | null
+  const users = (usersResult.data ?? []) as User[]
+  const logs = logsResult.data ?? []
 
   return (
     <>

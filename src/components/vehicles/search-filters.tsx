@@ -46,7 +46,7 @@ export function SearchFilters({ brands, years, compact = false }: Props) {
       role="search"
       aria-label="Rechercher un vehicule"
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="relative lg:col-span-2">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <Input
@@ -57,12 +57,6 @@ export function SearchFilters({ brands, years, compact = false }: Props) {
             className="pl-10"
           />
         </div>
-
-        <Select name="offerType" defaultValue={get('offerType')} aria-label="Type d'offre">
-          <option value="">Vente et location</option>
-          <option value="SALE">A vendre</option>
-          <option value="RENT">A louer</option>
-        </Select>
 
         <Select name="brand" defaultValue={get('brand')} aria-label="Marque">
           <option value="">Toutes les marques</option>

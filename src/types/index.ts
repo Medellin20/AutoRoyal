@@ -1,23 +1,6 @@
-import type {
-  Vehicle,
-  VehicleImage,
-  Reservation,
-  Customer,
-  PurchaseRequest,
-  Role,
-} from '@prisma/client'
-
-export type VehicleWithImages = Vehicle & { images: VehicleImage[] }
-
-export type ReservationWithRelations = Reservation & {
-  vehicle: Pick<Vehicle, 'id' | 'brand' | 'model' | 'reference' | 'slug'>
-  customer: Customer
-}
-
-export type PurchaseRequestWithRelations = PurchaseRequest & {
-  vehicle: Pick<Vehicle, 'id' | 'brand' | 'model' | 'reference' | 'slug'>
-  customer: Customer
-}
+import type { Role } from './database'
+export type { Vehicle, VehicleImage, Reservation, Customer, PurchaseRequest, SiteSetting, User, Role } from './database'
+export type { VehicleWithImages, ReservationWithRelations, PurchaseRequestWithRelations } from './database'
 
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T; message?: string }

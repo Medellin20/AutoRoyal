@@ -19,7 +19,7 @@ export default function Page() {
         {
           title: 'Editeur du site',
           body: [
-            `${siteConfig.legalName}, editeur de ce site consacre a la location et a la vente de vehicules.`,
+            `${siteConfig.legalName}, éditeur de ce site consacré à la vente de véhicules accidentés.`,
             `Adresse du siege social : a renseigner. Zone desservie : ${siteConfig.contact.address}. Telephone : ${siteConfig.contact.phone || 'a renseigner'}. E-mail : ${siteConfig.contact.email}.`,
             'Forme juridique, numero d immatriculation, identifiant fiscal, directeur de publication et coordonnees de l hebergeur a completer avant mise en production.',
           ],
@@ -43,7 +43,7 @@ export default function Page() {
         {
           title: 'Responsabilite',
           body: [
-            "Les informations techniques des vehicules sont fournies a titre indicatif et verifiees a chaque mise a jour. Seul l etat des lieux signe en agence fait foi.",
+            "Les informations visibles sur les fiches décrivent les dommages et l’état déclarés pour les véhicules proposés à la vente. Les modalités définitives sont confirmées avec le vendeur.",
           ],
         },
       ]}

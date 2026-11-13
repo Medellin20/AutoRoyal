@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import {
-  BadgeCheck, Banknote, CalendarCheck, CarFront, FileCheck2, Headphones,
-  KeyRound, MapPin, Quote, ShieldCheck, Wrench, Star,
+  BadgeCheck, Banknote, CarFront, FileCheck2, Headphones,
+  KeyRound, MapPin, ShieldCheck, Wrench,
 } from 'lucide-react'
 import { Reveal, Stagger, StaggerItem } from '@/components/ui/motion'
 import { ButtonLink } from '@/components/ui/button'
@@ -29,24 +29,24 @@ export function SectionHeader({
   )
 }
 
-/** Deux portes d'entree : acheter ou louer. */
+/** Deux étapes d'accès au catalogue et à la commande. */
 export function OfferSplit() {
   const offers = [
     {
-      title: 'Acheter',
-      href: '/vehicules?offerType=SALE',
+      title: 'Voir le catalogue',
+      href: '/vehicules',
       image: '/images/offer-sale.svg',
-      text: "Vehicules revises, historique verifie, garantie 6 mois sur le moteur et la boite.",
-      cta: 'Voir les vehicules a vendre',
+      text: 'Comparez le prix, les dommages déclarés et l’état de fonctionnement de chaque véhicule.',
+      cta: 'Parcourir les véhicules accidentés',
       icon: KeyRound,
     },
     {
-      title: 'Louer',
-      href: '/vehicules?offerType=RENT',
-      image: '/images/offer-rent.svg',
-      text: 'A la journee, a la semaine ou au mois. Assurance incluse, kilometrage genereux.',
-      cta: 'Voir les vehicules a louer',
-      icon: CalendarCheck,
+      title: 'Commander en ligne',
+      href: '/demande-achat',
+      image: '/images/hero.svg',
+      text: 'Renseignez vos coordonnées, recevez les instructions de paiement et téléchargez votre reçu PDF.',
+      cta: 'Créer une commande',
+      icon: FileCheck2,
     },
   ]
 
@@ -88,12 +88,12 @@ export function OfferSplit() {
 
 export function Advantages() {
   const items = [
-    { icon: ShieldCheck, title: 'Controle en 42 points', text: "Freins, embrayage, suspension, climatisation : rien n'est mis en ligne sans passer l'atelier." },
-    { icon: Banknote, title: 'Prix affiches', text: 'Le tarif que vous lisez est celui que vous payez. Les frais sont detailles avant signature.' },
-    { icon: FileCheck2, title: 'Papiers en regle', text: 'Carte grise, assurance et visite technique remis le jour de la livraison.' },
-    { icon: Wrench, title: 'Atelier integre', text: 'Une panne pendant la location ? Un vehicule de remplacement sous 4 h.' },
-    { icon: Headphones, title: 'Un interlocuteur unique', text: 'Le conseiller qui prend votre appel suit votre dossier jusqu au bout.' },
-    { icon: BadgeCheck, title: 'Garantie 6 mois', text: 'Moteur et boite couverts sur tous les vehicules vendus, sans franchise cachee.' },
+    { icon: ShieldCheck, title: 'Dommages déclarés', text: 'Chaque fiche indique le niveau, les zones endommagées et l’état de fonctionnement renseignés.' },
+    { icon: Banknote, title: 'Prix affiché', text: 'Le montant de la commande reprend le prix de vente présenté sur la fiche du véhicule.' },
+    { icon: FileCheck2, title: 'Commande traçable', text: 'Une référence unique relie le client, le véhicule et les étapes de paiement.' },
+    { icon: Wrench, title: 'Paiement vérifié', text: 'Le reçu ne confirme pas le paiement. Un administrateur vérifie réellement la réception des fonds.' },
+    { icon: Headphones, title: 'Suivi par l’équipe', text: 'Les commandes apparaissent dans l’espace d’administration dès leur création.' },
+    { icon: BadgeCheck, title: 'Reçu PDF', text: 'Téléchargez un reçu de commande qui précise clairement le statut du paiement.' },
   ]
 
   return (
@@ -102,7 +102,7 @@ export function Advantages() {
         <SectionHeader
           eyebrow="Pourquoi Laurent Crash Autos"
           title="Ce que vous obtenez en passant par nous"
-          description="Six engagements que nous tenons sur chaque dossier, en vente comme en location."
+          description="Les informations et étapes disponibles avant et après la création de commande."
         />
 
         <Stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -126,17 +126,19 @@ export function Advantages() {
 /** Le parcours est une vraie sequence : la numerotation porte l'information. */
 export function Steps() {
   const steps = [
-    { n: '01', title: 'Choisissez', text: 'Filtrez par budget, categorie et carburant. Chaque fiche indique le kilometrage reel.' },
-    { n: '02', title: 'Reservez en ligne', text: 'Dates, lieu de retrait et coordonnees. Le total s affiche avant l envoi.' },
-    { n: '03', title: 'Confirmez', text: 'Un conseiller vous rappelle sous 24 h pour valider les documents.' },
-    { n: '04', title: 'Repartez', text: 'Retrait en agence ou livraison a domicile, cles en main.' },
+    { n: '01', title: 'Catalogue', text: 'Parcourez les véhicules accidentés proposés à la vente.' },
+    { n: '02', title: 'Sélection', text: 'Consultez les détails, le prix et l’état du véhicule choisi.' },
+    { n: '03', title: 'Formulaire client', text: 'Indiquez votre nom, votre téléphone et votre adresse e-mail.' },
+    { n: '04', title: 'Commande', text: 'La commande est créée et le véhicule est réservé.' },
+    { n: '05', title: 'Paiement et reçu', text: 'Utilisez le RIB ou le lien affiché, puis téléchargez le reçu PDF.' },
+    { n: '06', title: 'Vérification', text: 'L’équipe confirme le paiement uniquement après réception réelle des fonds.' },
   ]
 
   return (
     <section className="shell py-20">
-      <SectionHeader eyebrow="Le parcours" title="Quatre etapes, rien de plus" />
+      <SectionHeader eyebrow="Le parcours" title="Du catalogue au paiement vérifié" />
 
-      <Stagger className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <Stagger className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {steps.map((step) => (
           <StaggerItem key={step.n}>
             <div className="border-t-2 border-accent pt-5">
@@ -151,54 +153,13 @@ export function Steps() {
   )
 }
 
-export function Testimonials() {
-  const reviews = [
-    { name: 'Fabrice A.', role: 'Location 15 jours', text: "Vehicule livre a l heure devant chez moi, propre, plein fait. Le contrat tenait sur une page et tout etait dedans." },
-    { name: 'Nadege K.', role: 'Achat Corolla 2019', text: "J ai pu faire verifier la voiture par mon mecanicien avant de signer. Aucun blocage, aucune pression." },
-    { name: 'Serge D.', role: 'Location longue duree', text: "Trois mois de location pour une mission. Facture claire chaque mois, entretien pris en charge." },
-  ]
-
-  return (
-    <section className="border-y border-line bg-surface py-20">
-      <div className="shell">
-        <SectionHeader eyebrow="Ils ont teste" title="Ce que disent nos clients" align="center" />
-
-        <Stagger className="mt-12 grid gap-6 lg:grid-cols-3">
-          {reviews.map((review) => (
-            <StaggerItem key={review.name}>
-              <figure className="h-full rounded-card border border-line bg-white p-6 shadow-soft">
-                <Quote className="h-6 w-6 text-gold" aria-hidden />
-                <blockquote className="mt-4 text-sm leading-relaxed text-ink/85">{review.text}</blockquote>
-                <figcaption className="mt-5 flex items-center gap-3 border-t border-line pt-4">
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-accent-soft text-xs font-semibold text-accent">
-                    {review.name.slice(0, 1)}
-                  </span>
-                  <span>
-                    <span className="block text-sm font-medium">{review.name}</span>
-                    <span className="block text-xs text-muted">{review.role}</span>
-                  </span>
-                  <span className="ml-auto flex gap-0.5" aria-label="5 etoiles sur 5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-gold text-gold" />
-                    ))}
-                  </span>
-                </figcaption>
-              </figure>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </div>
-    </section>
-  )
-}
-
 export const faqItems = [
-  { q: 'Quels documents faut-il pour louer ?', a: "Une piece d'identite en cours de validite, un permis de conduire et un justificatif de domicile. Les conditions exactes sont confirmees au devis." },
-  { q: 'La caution est-elle bloquée ?', a: "Elle est encaissee au depart et restituee sous 72 h apres le retour du vehicule, deduction faite d eventuels dommages constates a l etat des lieux." },
-  { q: 'Puis-je faire expertiser un vehicule avant d acheter ?', a: "Oui. Vous pouvez venir avec votre mecanicien ou demander un essai routier sur rendez-vous, sans engagement." },
-  { q: 'Proposez-vous un financement ?', a: "Nous travaillons avec deux partenaires bancaires. Indiquez-le dans votre demande d achat et un conseiller monte le dossier avec vous." },
-  { q: 'Le kilometrage est-il limite en location ?', a: "Le kilometrage inclus et le tarif des kilometres supplementaires sont precises sur chaque offre et au contrat." },
-  { q: 'Que se passe-t-il en cas de panne ?', a: "Appelez l atelier : depannage sur place ou vehicule de remplacement sous 4 h pendant les heures d ouverture." },
+  { q: 'Quels types de véhicules proposez-vous ?', a: 'Le catalogue présente des véhicules accidentés à vendre. Consultez chaque fiche pour connaître les dommages déclarés et l’état de fonctionnement.' },
+  { q: 'Comment créer une commande ?', a: 'Sélectionnez un véhicule, renseignez vos coordonnées puis validez le formulaire. Une référence de commande est alors créée.' },
+  { q: 'Comment payer ?', a: 'Après la création de la commande, la page indique le RIB ou le lien de paiement configuré par Laurent Crash Autos.' },
+  { q: 'Le reçu PDF confirme-t-il mon paiement ?', a: 'Non. Le reçu confirme uniquement la création de la commande. Le paiement reste en attente jusqu’à sa vérification réelle par l’équipe.' },
+  { q: 'Quand le véhicule est-il marqué vendu ?', a: 'Après réception effective du paiement et confirmation manuelle par un administrateur.' },
+  { q: 'Où puis-je acheter ?', a: 'Laurent Crash Autos dessert principalement la France et la zone européenne. Contactez l’équipe pour vérifier les modalités liées à votre destination.' },
 ]
 
 export function Faq({ items = faqItems }: { items?: { q: string; a: string }[] }) {
@@ -231,11 +192,11 @@ export function LocationSection() {
           <p className="eyebrow">Ou nous trouver</p>
           <div className="rule-gold mt-3" />
           <h2 className="mt-5 font-display text-3xl font-semibold sm:text-4xl">
-            Passez à l&apos;agence, l&apos;essai est libre
+            Un véhicule vous intéresse ?
           </h2>
           <p className="mt-3 text-base leading-relaxed text-muted">
-            Le parc est visible sur place du lundi au samedi. Prenez rendez-vous pour un essai routier
-            ou venez simplement voir les vehicules disponibles.
+            Consultez sa fiche et son état, puis créez votre commande en ligne. L’équipe pourra répondre
+            à vos questions sur le véhicule et les modalités de vente.
           </p>
 
           <ul className="mt-6 space-y-3 text-sm">
@@ -250,7 +211,7 @@ export function LocationSection() {
           </ul>
 
           <ButtonLink href="/contact" className="mt-8">
-            Prendre rendez-vous
+            Voir le catalogue
           </ButtonLink>
         </Reveal>
 

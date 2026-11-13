@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin } from '@/lib/supabase'
+import type { Customer, Reservation, Vehicle } from '@/types/database'
 import { can } from '@/lib/permissions'
 import { reservationStatusLabels } from '@/lib/labels'
 
@@ -20,13 +21,20 @@ export async function GET() {
     return NextResponse.json({ message: 'Votre role ne permet pas l export.' }, { status: 403 })
   }
 
-  const reservations = await prisma.reservation.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      customer: true,
-      vehicle: { select: { brand: true, model: true, reference: true } },
-    },
-  })
+  const db = getSupabaseAdmin()
+  const [reservationResult, customerResult, vehicleResult] = await Promise.all([
+    db.from('reservations').select('*').order('createdAt', { ascending: false }),
+    db.from('customers').select('*'),
+    db.from('vehicles').select('id,brand,model,reference'),
+  ])
+  if (reservationResult.error || customerResult.error || vehicleResult.error) {
+    return NextResponse.json({ message: 'Export indisponible.' }, { status: 500 })
+  }
+  const customers = new Map(((customerResult.data ?? []) as Customer[]).map((row) => [row.id, row]))
+  const vehicles = new Map(((vehicleResult.data ?? []) as Vehicle[]).map((row) => [row.id, row]))
+  const reservations = (reservationResult.data ?? []).map((row) => ({
+    ...row, customer: customers.get(row.customerId), vehicle: vehicles.get(row.vehicleId),
+  })).filter((row) => row.customer && row.vehicle) as (Reservation & { customer: Customer; vehicle: Vehicle })[]
 
   const header = [
     'Reference', 'Statut', 'Vehicule', 'Ref. vehicule', 'Client', 'Telephone', 'E-mail',
@@ -42,13 +50,13 @@ export async function GET() {
       r.customer.fullName,
       r.customer.phone,
       r.customer.email,
-      r.startDate.toISOString().slice(0, 10),
-      r.endDate.toISOString().slice(0, 10),
+      new Date(r.startDate).toISOString().slice(0, 10),
+      new Date(r.endDate).toISOString().slice(0, 10),
       r.days,
       r.pickupPlace,
       r.returnPlace,
       Number(r.totalPrice),
-      r.createdAt.toISOString().slice(0, 16).replace('T', ' '),
+      new Date(r.createdAt).toISOString().slice(0, 16).replace('T', ' '),
     ].map(csvCell).join(';'),
   )
 

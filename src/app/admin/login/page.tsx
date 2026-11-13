@@ -24,7 +24,7 @@ export default async function LoginPage() {
         <div className="mt-8 rounded-card border border-line bg-white p-7 shadow-soft">
           <h1 className="font-display text-xl font-semibold">Espace administrateur</h1>
           <p className="mt-1.5 text-sm text-muted">
-            Connectez-vous pour gerer le parc, les reservations et les demandes.
+            Connectez-vous pour gérer les véhicules accidentés, les commandes et les paiements.
           </p>
           <div className="mt-6">
             <Suspense fallback={null}>

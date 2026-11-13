@@ -21,17 +21,17 @@ const body = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} - Location et vente de vehicules`,
+    default: `${siteConfig.name} - Vente de véhicules accidentés`,
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: ['location voiture', 'vente voiture', 'garage', siteConfig.name, 'France', 'Europe'],
+  keywords: ['véhicules accidentés', 'voitures accidentées à vendre', 'pièces automobiles', 'France', 'Europe', siteConfig.name],
   openGraph: {
     type: 'website',
     locale: siteConfig.locale,
     url: siteConfig.url,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} - Location et vente de vehicules`,
+    title: `${siteConfig.name} - Vente de véhicules accidentés`,
     description: siteConfig.description,
     images: [{ url: siteConfig.logo, width: 1272, height: 530, alt: siteConfig.name }],
   },

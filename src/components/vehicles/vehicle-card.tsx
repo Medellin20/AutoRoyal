@@ -17,10 +17,7 @@ export function VehicleCard({ vehicle, index = 0 }: { vehicle: VehicleWithImages
   const main = vehicle.images.find((i) => i.isMain) ?? vehicle.images[0]
   const favorite = ready && isFavorite(vehicle.id)
 
-  const price =
-    vehicle.offerType === 'RENT'
-      ? `${formatPrice(vehicle.dailyPrice as never)} / jour`
-      : formatPrice(vehicle.salePrice as never)
+  const price = formatPrice(vehicle.salePrice as never, vehicle.currency)
 
   return (
     <motion.article
@@ -61,7 +58,7 @@ export function VehicleCard({ vehicle, index = 0 }: { vehicle: VehicleWithImages
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate font-display text-lg font-semibold">
-              {vehicle.brand} {vehicle.model}
+              {vehicle.title || `${vehicle.brand} ${vehicle.model}`}
             </h3>
             <p className="mt-0.5 text-sm text-muted">
               {vehicle.version ? `${vehicle.version} - ` : ''}

@@ -20,13 +20,13 @@ export default function Page() {
           title: 'Donnees collectees',
           body: [
             "Nous collectons uniquement les informations que vous saisissez dans nos formulaires : nom, telephone, adresse e-mail, adresse postale et contenu de vos messages.",
-            "Aucune donnee bancaire n est saisie ni conservee sur ce site : les paiements se font en agence.",
+            "Le site ne collecte pas les identifiants bancaires du client ni les données de carte. Le RIB professionnel ou le lien de paiement configuré pour les commandes est conservé dans l’espace d’administration.",
           ],
         },
         {
           title: 'Finalites',
           body: [
-            "Ces informations servent a traiter votre demande de reservation ou d achat, a vous recontacter et a etablir les documents contractuels.",
+            "Ces informations servent à créer et suivre les commandes de véhicules, à enregistrer les paiements vérifiés, à envoyer une alerte de commande à l’administration et à répondre aux messages.",
             "Elles ne sont ni vendues ni cedees a des tiers a des fins commerciales.",
           ],
         },

@@ -12,7 +12,7 @@ import { adminNav } from '@/config/nav'
 import { roleLabels } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/logo'
-import type { Role } from '@prisma/client'
+import type { Role } from '@/types/database'
 
 const icons = { LayoutDashboard, Car, CalendarCheck, ShoppingBag, Users, Settings }
 

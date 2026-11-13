@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Download } from 'lucide-react'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { PageHeader } from '@/components/admin/page-header'
 import { SearchInput } from '@/components/admin/search-input'
 import { StatusSelect } from '@/components/admin/status-select'
@@ -11,6 +11,7 @@ import { formatDate, formatPrice } from '@/lib/utils'
 import { reservationStatusLabels } from '@/lib/labels'
 import { auth } from '@/lib/auth'
 import { can } from '@/lib/permissions'
+import type { Customer, Reservation, Vehicle } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,27 +23,21 @@ export default async function AdminReservationsPage({
   const session = await auth()
   const canExport = can(session?.user.role, 'reservation:export')
 
-  const reservations = await prisma.reservation.findMany({
-    where: {
-      ...(searchParams.status ? { status: searchParams.status as never } : {}),
-      ...(searchParams.q
-        ? {
-            OR: [
-              { reference: { contains: searchParams.q, mode: 'insensitive' } },
-              { customer: { fullName: { contains: searchParams.q, mode: 'insensitive' } } },
-              { customer: { phone: { contains: searchParams.q } } },
-              { vehicle: { brand: { contains: searchParams.q, mode: 'insensitive' } } },
-              { vehicle: { model: { contains: searchParams.q, mode: 'insensitive' } } },
-            ],
-          }
-        : {}),
-    },
-    include: {
-      customer: true,
-      vehicle: { select: { brand: true, model: true, slug: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  const db = getSupabaseAdmin()
+  const [reservationsResult, customersResult, vehiclesResult] = await Promise.all([
+    db.from('reservations').select('*').order('createdAt', { ascending: false }),
+    db.from('customers').select('*'),
+    db.from('vehicles').select('id,brand,model,slug'),
+  ])
+  if (reservationsResult.error || customersResult.error || vehiclesResult.error) throw new Error('Lecture des reservations impossible.')
+  const customerMap = new Map(((customersResult.data ?? []) as Customer[]).map((row) => [row.id, row]))
+  const vehicleMap = new Map(((vehiclesResult.data ?? []) as Vehicle[]).map((row) => [row.id, row]))
+  const search = searchParams.q?.toLowerCase()
+  const reservations = ((reservationsResult.data ?? []) as Reservation[])
+    .filter((row) => !searchParams.status || row.status === searchParams.status)
+    .map((row) => ({ ...row, customer: customerMap.get(row.customerId), vehicle: vehicleMap.get(row.vehicleId) }))
+    .filter((row) => row.customer && row.vehicle)
+    .filter((row) => !search || [row.reference, row.customer!.fullName, row.customer!.phone, row.vehicle!.brand, row.vehicle!.model].some((value) => value.toLowerCase().includes(search)))
 
   const filters = [
     { label: 'Toutes', value: '' },

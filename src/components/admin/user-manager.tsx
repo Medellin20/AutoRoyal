@@ -11,7 +11,7 @@ import { Field, Input, Select } from '@/components/ui/field'
 import { createAdminUser, toggleUserActive } from '@/server/actions/settings'
 import { roleLabels } from '@/lib/labels'
 import { formatDate } from '@/lib/utils'
-import type { User } from '@prisma/client'
+import type { User } from '@/types/database'
 
 export function UserManager({
   users,

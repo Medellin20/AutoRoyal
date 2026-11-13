@@ -1,4 +1,4 @@
-import type { Role } from '@prisma/client'
+import type { Role } from '@/types/database'
 
 /** Actions sensibles reservees a certains roles. */
 export const permissions = {
@@ -11,6 +11,7 @@ export const permissions = {
   'reservation:export': ['SUPER_ADMIN', 'ADMIN'],
   'purchase:read': ['SUPER_ADMIN', 'ADMIN', 'MANAGER'],
   'purchase:update': ['SUPER_ADMIN', 'ADMIN', 'MANAGER'],
+  'payment:verify': ['SUPER_ADMIN', 'ADMIN'],
   'customer:read': ['SUPER_ADMIN', 'ADMIN'],
   'customer:delete': ['SUPER_ADMIN'],
   'user:manage': ['SUPER_ADMIN'],

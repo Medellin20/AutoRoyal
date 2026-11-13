@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin } from '@/lib/supabase'
+import type { Customer } from '@/types/database'
 import { auth } from '@/lib/auth'
 import { can } from '@/lib/permissions'
 import { PageHeader } from '@/components/admin/page-header'
@@ -16,19 +17,18 @@ export default async function AdminCustomersPage({
   const session = await auth()
   if (!can(session?.user.role, 'customer:read')) redirect('/admin')
 
-  const customers = await prisma.customer.findMany({
-    where: searchParams.q
-      ? {
-          OR: [
-            { fullName: { contains: searchParams.q, mode: 'insensitive' } },
-            { email: { contains: searchParams.q, mode: 'insensitive' } },
-            { phone: { contains: searchParams.q } },
-          ],
-        }
-      : {},
-    include: { _count: { select: { reservations: true, purchaseRequests: true } } },
-    orderBy: { createdAt: 'desc' },
-  })
+  const db = getSupabaseAdmin()
+  const [customersResult, ordersResult] = await Promise.all([
+    db.from('customers').select('*').order('createdAt', { ascending: false }),
+    db.from('sales_orders').select('customerId'),
+  ])
+  if (customersResult.error || ordersResult.error) throw new Error('Lecture des clients impossible.')
+  const orderCounts = new Map<string, number>()
+  for (const row of ordersResult.data ?? []) orderCounts.set(row.customerId, (orderCounts.get(row.customerId) ?? 0) + 1)
+  const search = searchParams.q?.toLowerCase()
+  const customers = ((customersResult.data ?? []) as Customer[])
+    .filter((customer) => !search || [customer.fullName, customer.email, customer.phone].some((value) => value.toLowerCase().includes(search)))
+    .map((customer) => ({ ...customer, orderCount: orderCounts.get(customer.id) ?? 0 }))
 
   return (
     <>
@@ -42,7 +42,7 @@ export default async function AdminCustomersPage({
         <div className="rounded-card border border-dashed border-line bg-white p-12 text-center">
           <h2 className="font-display text-lg font-semibold">Aucun client enregistre</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
-            Une fiche client est créée automatiquement a la premiere demande envoyee depuis le site.
+            Une fiche client est créée automatiquement à la première commande passée sur le site.
           </p>
         </div>
       ) : (
@@ -53,8 +53,7 @@ export default async function AdminCustomersPage({
                 <th className="px-5 py-3.5 font-medium">Nom</th>
                 <th className="px-5 py-3.5 font-medium">Contact</th>
                 <th className="px-5 py-3.5 font-medium">Adresse</th>
-                <th className="px-5 py-3.5 font-medium">Reservations</th>
-                <th className="px-5 py-3.5 font-medium">Demandes d achat</th>
+            <th className="px-5 py-3.5 font-medium">Commandes</th>
                 <th className="px-5 py-3.5 font-medium">Client depuis</th>
               </tr>
             </thead>
@@ -71,8 +70,7 @@ export default async function AdminCustomersPage({
                     </a>
                   </td>
                   <td className="px-5 py-3 text-muted">{customer.address ?? '-'}</td>
-                  <td className="px-5 py-3">{customer._count.reservations}</td>
-                  <td className="px-5 py-3">{customer._count.purchaseRequests}</td>
+                  <td className="px-5 py-3">{customer.orderCount}</td>
                   <td className="px-5 py-3 text-muted">{formatDate(customer.createdAt)}</td>
                 </tr>
               ))}

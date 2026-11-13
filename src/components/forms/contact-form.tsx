@@ -54,7 +54,7 @@ export function ContactForm() {
         </Field>
 
         <Field label="Objet" htmlFor="subject" required error={errors.subject?.[0]}>
-          <Input id="subject" name="subject" placeholder="Essai routier, disponibilite, facture..." required />
+          <Input id="subject" name="subject" placeholder="Question sur un véhicule, son état ou une commande..." required />
         </Field>
 
         <Field label="Message" htmlFor="message" required error={errors.message?.[0]}>

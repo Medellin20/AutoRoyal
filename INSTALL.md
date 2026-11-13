@@ -1,37 +1,30 @@
-# Demarrage rapide
+# Démarrage rapide
 
 ```bash
-# 1. Dependances
 npm install
-
-# 2. Environnement
 cp .env.example .env
-# renseigner DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
+```
 
-# 3. Base Supabase (renseigner DATABASE_URL et DIRECT_URL dans .env)
-npx prisma generate
-npm run db:deploy
+Dans `.env`, définissez les trois valeurs API du projet Supabase :
 
-# 4. Optionnel : donnees de demonstration (efface les donnees avant rechargement)
-# a lancer uniquement sur une base de demonstration vide
-npm run db:seed
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (serveur uniquement)
 
-# 5. Lancer
+Exécutez les migrations de `supabase/migrations` dans l’ordre des noms depuis l’éditeur SQL du
+tableau de bord Supabase. Puis définissez `NEXTAUTH_SECRET`, `ADMIN_EMAIL` et `ADMIN_PASSWORD`.
+Créez l’administrateur initial avec :
+
+```bash
+npm run admin:create
 npm run dev
 ```
 
-Site public : http://localhost:3000
-Administration : http://localhost:3000/admin/login
+Dans l’administration, configurez le RIB ou le lien de paiement. Pour recevoir une alerte e-mail
+après chaque création de commande, définissez `RESEND_API_KEY`, `RESEND_FROM_EMAIL` et,
+facultativement, `ORDER_ALERT_EMAIL`. Sans destinataire explicite, `ADMIN_EMAIL` reçoit les alertes.
+Le reçu PDF confirme uniquement la commande, jamais le paiement : seul le contrôle réel dans
+l’espace admin confirme les fonds.
 
-## Commandes utiles
-
-| Commande | Effet |
-| --- | --- |
-| `npm run dev` | serveur de developpement |
-| `npm run build` | build de production (inclut `prisma generate`) |
-| `npm start` | serveur de production |
-| `npm run db:migrate` | nouvelle migration en developpement |
-| `npm run db:deploy` | appliquer les migrations en production |
-| `npm run db:studio` | explorateur de base de donnees |
-| `npm run db:seed` | effacer puis recharger les donnees de demonstration (base de demo seulement) |
-| `npm run lint` | verification ESLint |
+Le site est disponible sur http://localhost:3000 et l’administration sur
+http://localhost:3000/admin/login. Prisma n’est plus utilisé.

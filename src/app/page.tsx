@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { PublicShell } from '@/components/layout/public-shell'
 import { Hero } from '@/components/home/hero'
 import {
-  Advantages, Faq, LocationSection, OfferSplit, SectionHeader, Steps, Testimonials,
+  Advantages, Faq, LocationSection, OfferSplit, SectionHeader, Steps,
 } from '@/components/home/sections'
 import { SearchFilters } from '@/components/vehicles/search-filters'
 import { VehicleCard } from '@/components/vehicles/vehicle-card'
@@ -55,7 +55,6 @@ export default async function HomePage() {
       <OfferSplit />
       <Advantages />
       <Steps />
-      <Testimonials />
       <Faq />
       <LocationSection />
     </PublicShell>

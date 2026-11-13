@@ -6,8 +6,8 @@ import { getSellableVehicles } from '@/server/queries'
 import { buildMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = buildMetadata({
-  title: "Demande d'achat",
-  description: "Indiquez le vehicule qui vous interesse, votre budget et vos preferences de paiement.",
+  title: 'Commander un vehicule accidenté',
+  description: 'Choisissez un véhicule accidenté et créez votre commande en ligne.',
   path: '/demande-achat',
 })
 
@@ -24,12 +24,12 @@ export default async function PurchasePage({
     <PublicShell>
       <section className="border-b border-line bg-surface py-12">
         <div className="shell">
-          <p className="eyebrow">Vente</p>
+          <p className="eyebrow">Vente de véhicules accidentés</p>
           <div className="rule-gold mt-3" />
-          <h1 className="mt-5 font-display text-4xl font-semibold">Demande d&apos;achat</h1>
+          <h1 className="mt-5 font-display text-4xl font-semibold">Commander un véhicule</h1>
           <p className="mt-3 max-w-xl text-base text-muted">
-            Un conseiller vous rappelle sous 24 h avec la fiche technique complete, l&apos;historique
-            d&apos;entretien et les options de financement.
+            Créez votre commande puis réglez par virement bancaire ou via le lien sécurisé. Le paiement
+            reste en attente jusqu&apos;à sa vérification par notre équipe.
           </p>
         </div>
       </section>

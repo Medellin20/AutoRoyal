@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import { Plus } from 'lucide-react'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin } from '@/lib/supabase'
+import { getAdminVehiclesWithImages } from '@/server/vehicle-data'
+import type { Vehicle } from '@/types/database'
 import { PageHeader } from '@/components/admin/page-header'
 import { SearchInput } from '@/components/admin/search-input'
 import { VehicleRowActions } from '@/components/admin/vehicle-row-actions'
@@ -18,22 +20,16 @@ export default async function AdminVehiclesPage({
 }: {
   searchParams: { q?: string; status?: string }
 }) {
-  const vehicles = await prisma.vehicle.findMany({
-    where: {
-      ...(searchParams.status ? { status: searchParams.status as never } : {}),
-      ...(searchParams.q
-        ? {
-            OR: [
-              { brand: { contains: searchParams.q, mode: 'insensitive' } },
-              { model: { contains: searchParams.q, mode: 'insensitive' } },
-              { reference: { contains: searchParams.q, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-    },
-    include: { images: { orderBy: { position: 'asc' }, take: 1 } },
-    orderBy: { createdAt: 'desc' },
-  })
+  let query = getSupabaseAdmin().from('vehicles').select('*').in('offerType', ['SALE', 'BOTH']).order('createdAt', { ascending: false })
+  if (searchParams.status) query = query.eq('status', searchParams.status)
+  if (searchParams.q) {
+    const q = searchParams.q.trim().replace(/[(),*]/g, ' ')
+    query = query.or(`brand.ilike.%${q}%,model.ilike.%${q}%,reference.ilike.%${q}%`)
+  }
+  const { data, error } = await query
+  if (error) throw new Error(error.message)
+  const fullVehicles = await getAdminVehiclesWithImages((data ?? []) as Vehicle[])
+  const vehicles = fullVehicles.map((vehicle) => ({ ...vehicle, images: vehicle.images.slice(0, 1) }))
 
   return (
     <>
@@ -94,7 +90,7 @@ export default async function AdminVehiclesPage({
                       </div>
                       <div className="min-w-0">
                         <p className="truncate font-medium">
-                          {vehicle.brand} {vehicle.model}
+                          {vehicle.title || `${vehicle.brand} ${vehicle.model}`}
                         </p>
                         <p className="text-xs text-muted">{vehicle.year}</p>
                       </div>
@@ -103,8 +99,8 @@ export default async function AdminVehiclesPage({
                   <td className="px-5 py-3 text-muted">{vehicle.reference}</td>
                   <td className="px-5 py-3">
                     {vehicle.salePrice
-                      ? formatPrice(vehicle.salePrice as never)
-                      : `${formatPrice(vehicle.dailyPrice as never)} / j`}
+                      ? formatPrice(vehicle.salePrice as never, vehicle.currency)
+                      : 'Prix à définir'}
                   </td>
                   <td className="px-5 py-3 text-muted">{formatNumber(vehicle.mileage)}</td>
                   <td className="px-5 py-3">

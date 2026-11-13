@@ -7,13 +7,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /** Formate un montant dans la devise du garage. */
-export function formatPrice(value: number | string | null | undefined): string {
+export function formatPrice(value: number | string | null | undefined, currency: string = siteConfig.currency): string {
   if (value === null || value === undefined || value === '') return 'Sur demande'
   const amount = typeof value === 'string' ? Number(value) : value
   if (Number.isNaN(amount)) return 'Sur demande'
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: siteConfig.currency,
+    currency,
     maximumFractionDigits: 0,
   }).format(amount)
 }
@@ -70,7 +70,7 @@ export function truncate(text: string, length = 140): string {
   return text.length > length ? `${text.slice(0, length).trimEnd()}...` : text
 }
 
-/** Convertit une valeur Prisma Decimal en number utilisable cote client. */
+/** Convertit une valeur numerique de la base en number utilisable cote client. */
 export function toNumber(value: unknown): number | null {
   if (value === null || value === undefined) return null
   const n = Number(value)

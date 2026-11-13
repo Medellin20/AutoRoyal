@@ -1,7 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin, getSupabasePublic, newId } from '@/lib/supabase'
+import { saveCustomer } from '@/server/customers'
 import { purchaseSchema, purchaseStatusSchema } from '@/validations/purchase'
 import { makeReference } from '@/lib/utils'
 import { requireAdmin } from '@/lib/auth'
@@ -28,10 +29,9 @@ export async function createPurchaseRequest(
   }
 
   const data = parsed.data
-  const vehicle = await prisma.vehicle.findUnique({
-    where: { id: data.vehicleId },
-    select: { id: true, published: true, offerType: true, status: true },
-  })
+  const { data: vehicle, error: vehicleError } = await getSupabasePublic().from('vehicles')
+    .select('id,published,offerType,status').eq('id', data.vehicleId).maybeSingle()
+  if (vehicleError) return { ok: false, message: 'Impossible de verifier ce vehicule.' }
 
   if (!vehicle || !vehicle.published || vehicle.offerType === 'RENT') {
     return { ok: false, message: "Ce vehicule n'est pas propose a la vente." }
@@ -40,25 +40,19 @@ export async function createPurchaseRequest(
     return { ok: false, message: 'Ce vehicule est deja vendu.' }
   }
 
-  const customer = await prisma.customer.upsert({
-    where: { email_phone: { email: data.email.toLowerCase(), phone: data.phone } },
-    update: { fullName: data.fullName },
-    create: { fullName: data.fullName, email: data.email.toLowerCase(), phone: data.phone },
-  })
+  let customer
+  try {
+    customer = await saveCustomer({ fullName: data.fullName, email: data.email, phone: data.phone })
+  } catch {
+    return { ok: false, message: 'Impossible d enregistrer les coordonnees du client.' }
+  }
 
-  const request = await prisma.purchaseRequest.create({
-    data: {
-      reference: makeReference('ACH'),
-      vehicleId: vehicle.id,
-      customerId: customer.id,
-      budget: data.budget,
-      payment: data.payment,
-      financing: data.financing,
-      tradeIn: data.tradeIn,
-      tradeInInfo: data.tradeInInfo || null,
-      message: data.message || null,
-    },
-  })
+  const { data: request, error } = await getSupabaseAdmin().from('purchase_requests').insert({
+    id: newId(), reference: makeReference('ACH'), vehicleId: vehicle.id, customerId: customer.id,
+    budget: data.budget, payment: data.payment, financing: data.financing, tradeIn: data.tradeIn,
+    tradeInInfo: data.tradeInInfo || null, message: data.message || null,
+  }).select('reference').single()
+  if (error || !request) return { ok: false, message: 'Impossible d enregistrer la demande d achat.' }
 
   revalidatePath('/admin/demandes-achat')
   return {
@@ -77,7 +71,9 @@ export async function updatePurchaseStatus(id: string, status: string): Promise<
   const parsed = purchaseStatusSchema.safeParse({ id, status })
   if (!parsed.success) return { ok: false, message: 'Statut invalide.' }
 
-  await prisma.purchaseRequest.update({ where: { id }, data: { status: parsed.data.status } })
+  const { error } = await getSupabaseAdmin().from('purchase_requests')
+    .update({ status: parsed.data.status, updatedAt: new Date().toISOString() }).eq('id', id)
+  if (error) return { ok: false, message: 'Impossible de modifier le statut.' }
   await logAudit({
     userId: user.id,
     userEmail: user.email ?? '',
@@ -93,7 +89,9 @@ export async function updatePurchaseStatus(id: string, status: string): Promise<
 
 export async function addPurchaseNote(id: string, note: string): Promise<ActionResult> {
   const user = await requireAdmin()
-  await prisma.purchaseRequest.update({ where: { id }, data: { internalNote: note.slice(0, 2000) } })
+  const { error } = await getSupabaseAdmin().from('purchase_requests')
+    .update({ internalNote: note.slice(0, 2000), updatedAt: new Date().toISOString() }).eq('id', id)
+  if (error) return { ok: false, message: 'Impossible d enregistrer la note.' }
   await logAudit({
     userId: user.id,
     userEmail: user.email ?? '',

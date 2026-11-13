@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, Star, Trash2, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/modal'
 import { removeImage, reorderImages, setMainImage } from '@/server/actions/vehicle'
-import type { VehicleImage } from '@prisma/client'
+import type { VehicleImage } from '@/types/database'
 
 export function ImageManager({
   vehicleId,

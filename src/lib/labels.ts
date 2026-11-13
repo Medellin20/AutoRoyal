@@ -44,6 +44,21 @@ export const vehicleStatusTone: Record<string, 'success' | 'warning' | 'danger' 
   MAINTENANCE: 'danger',
 }
 
+export const damageLevelLabels: Record<string, string> = {
+  LEGER: 'Dommages légers',
+  MODERE: 'Dommages modérés',
+  IMPORTANT: 'Dommages importants',
+  NON_ROULANT: 'Véhicule non roulant',
+  A_DEFINIR: 'État à préciser',
+}
+
+export const runningConditionLabels: Record<string, string> = {
+  ROULANT: 'Roulant',
+  DEMARRE: 'Démarre, à contrôler',
+  NON_ROULANT: 'Non roulant',
+  A_VERIFIER: 'À vérifier',
+}
+
 export const reservationStatusLabels: Record<string, string> = {
   PENDING: 'En attente',
   CONFIRMED: 'Confirmee',

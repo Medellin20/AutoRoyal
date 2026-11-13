@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next'
-import { prisma } from '@/lib/prisma'
+import { getSupabasePublic } from '@/lib/supabase'
 import { siteConfig } from '@/config/site'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
-    '', '/vehicules', '/reservation', '/demande-achat', '/services',
-    '/a-propos', '/faq', '/contact', '/conditions-location',
+    '', '/vehicules', '/demande-achat', '/services',
+    '/a-propos', '/faq', '/contact',
     '/politique-confidentialite', '/mentions-legales',
   ].map((path) => ({
     url: `${siteConfig.url}${path}`,
@@ -16,12 +16,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let vehicles = [] as { slug: string; updatedAt: Date }[]
   try {
-    vehicles = await prisma.vehicle.findMany({
-      where: { published: true },
-      select: { slug: true, updatedAt: true },
-    })
+    const { data, error } = await getSupabasePublic().from('vehicles').select('slug,updatedAt').eq('published', true)
+    if (error) throw error
+    vehicles = (data ?? []) as { slug: string; updatedAt: Date }[]
   } catch (e) {
-    // If Prisma cannot connect (e.g. during a local build without DATABASE_URL),
+    // If Supabase is not configured during a local build,
     // fall back to returning only the static routes so the build can proceed.
     // The sitemap will be more complete at runtime when a database is available.
     // eslint-disable-next-line no-console

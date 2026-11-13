@@ -23,6 +23,24 @@ export const vehicleSchema = z
       .max(currentYear + 1, 'Annee invalide.'),
     offerType: z.enum(['SALE', 'RENT', 'BOTH']),
     status: z.enum(['AVAILABLE', 'RESERVED', 'RENTED', 'SOLD', 'MAINTENANCE']),
+    damageLevel: z.enum(['LEGER', 'MODERE', 'IMPORTANT', 'NON_ROULANT', 'A_DEFINIR']),
+    runningCondition: z.enum(['ROULANT', 'DEMARRE', 'NON_ROULANT', 'A_VERIFIER']),
+    damageTypes: z.array(z.string().min(2).max(80)).max(20).default([]),
+    title: z.string().min(5, 'Indiquez un titre clair pour l’annonce.').max(120),
+    vehicleType: z.enum(['VOITURE', 'UTILITAIRE', 'MOTO', 'CAMION', 'AUTRE']),
+    engine: z.string().min(2, 'Indiquez la motorisation.').max(80),
+    displacement: z.coerce.number().int().min(0).max(20000),
+    drivetrain: z.enum(['TRACTION', 'PROPULSION', 'INTEGRALE', 'AUTRE']),
+    bodyCondition: z.enum(['BON', 'MOYEN', 'ENDOMMAGE', 'A_VERIFIER']),
+    damageDescription: z.string().min(10, 'Décrivez les dommages (10 caractères minimum).').max(3000),
+    titleStatus: z.enum(['A_VERIFIER', 'CLAIR', 'ACCIDENTE', 'MANQUANT']),
+    city: z.string().min(2, 'Indiquez la ville.').max(100),
+    country: z.string().min(2, 'Indiquez le pays.').max(100),
+    currency: z.enum(['EUR', 'USD', 'GBP', 'XOF']),
+    quantity: z.coerce.number().int().min(0).max(1000),
+    keysCount: z.coerce.number().int().min(0).max(20),
+    internationalSale: z.boolean().default(false),
+    videoUrl: z.union([z.literal(''), z.string().url().max(500)]).optional().default(''),
 
     salePrice: optionalPrice,
     dailyPrice: optionalPrice,
@@ -48,12 +66,12 @@ export const vehicleSchema = z
     published: z.boolean().default(false),
   })
   .refine(
-    (data) => data.offerType === 'RENT' || data.salePrice !== null,
-    { message: 'Indiquez un prix de vente pour un vehicule a vendre.', path: ['salePrice'] },
+    (data) => data.salePrice !== null,
+    { message: 'Indiquez un prix fixe de vente.', path: ['salePrice'] },
   )
   .refine(
-    (data) => data.offerType === 'SALE' || data.dailyPrice !== null,
-    { message: 'Indiquez un tarif journalier pour un vehicule a louer.', path: ['dailyPrice'] },
+    (data) => !data.published || (data.title.length >= 5 && data.brand.length > 0 && data.model.length > 0 && data.damageDescription.length >= 10 && data.damageTypes.length > 0 && data.damageLevel !== 'A_DEFINIR' && data.quantity > 0),
+    { message: 'Complétez les informations obligatoires avant publication.', path: ['published'] },
   )
 
 export const vehicleImageSchema = z.object({

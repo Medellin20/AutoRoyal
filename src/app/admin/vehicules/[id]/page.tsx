@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin } from '@/lib/supabase'
+import { getAdminVehiclesWithImages } from '@/server/vehicle-data'
+import type { Vehicle } from '@/types/database'
 import { PageHeader } from '@/components/admin/page-header'
 import { VehicleForm } from '@/components/admin/vehicle-form'
 import { ImageManager } from '@/components/admin/image-manager'
@@ -8,10 +10,9 @@ export const metadata = { title: 'Modifier un vehicule' }
 export const dynamic = 'force-dynamic'
 
 export default async function EditVehiclePage({ params }: { params: { id: string } }) {
-  const vehicle = await prisma.vehicle.findUnique({
-    where: { id: params.id },
-    include: { images: { orderBy: { position: 'asc' } } },
-  })
+  const { data, error } = await getSupabaseAdmin().from('vehicles').select('*').eq('id', params.id).maybeSingle()
+  if (error) throw new Error(error.message)
+  const [vehicle] = data ? await getAdminVehiclesWithImages([data as Vehicle]) : []
 
   if (!vehicle) notFound()
 

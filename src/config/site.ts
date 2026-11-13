@@ -5,9 +5,9 @@
 export const siteConfig = {
   name: 'Laurent Crash Autos',
   legalName: 'Laurent Crash Autos',
-  tagline: 'Louez ou achetez votre prochaine voiture, sans mauvaise surprise.',
+  tagline: 'Véhicules accidentés à vendre en France et en Europe.',
   description:
-    "Laurent Crash Autos loue et vend des vehicules controles, livres propres, avec des tarifs affiches et un contrat clair.",
+    'Laurent Crash Autos propose des véhicules accidentés à la vente avec des informations transparentes sur leur état.',
   logo: '/images/laurent-crash-autos.png',
   logoLight: '/images/laurent-crash-autos.png',
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',

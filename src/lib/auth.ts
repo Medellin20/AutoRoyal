@@ -3,10 +3,10 @@ import { getServerSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { headers } from 'next/headers'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { isLoginBlocked, recordLoginAttempt } from '@/lib/rate-limit'
 import { loginSchema } from '@/validations/auth'
-import type { Role } from '@prisma/client'
+import type { Role, User } from '@/types/database'
 
 declare module 'next-auth' {
   interface Session {
@@ -61,9 +61,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Trop de tentatives. Reessayez dans 15 minutes.')
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: email.toLowerCase() },
-        })
+        const { data: userRow, error: userError } = await getSupabaseAdmin()
+          .from('users')
+          .select('*')
+          .eq('email', email.toLowerCase())
+          .maybeSingle()
+        if (userError) throw userError
+        const user = userRow as User | null
 
         if (!user || !user.active) {
           await recordLoginAttempt(email, ip, false)
@@ -77,10 +81,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         await recordLoginAttempt(email, ip, true)
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() },
-        })
+        const { error: updateError } = await getSupabaseAdmin().from('users')
+          .update({ lastLoginAt: new Date().toISOString() }).eq('id', user.id)
+        if (updateError) throw updateError
 
         return { id: user.id, name: user.name, email: user.email, role: user.role }
       },

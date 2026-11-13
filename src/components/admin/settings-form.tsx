@@ -3,10 +3,10 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { Field, Input } from '@/components/ui/field'
+import { Field, Input, Select } from '@/components/ui/field'
 import { updateSettings } from '@/server/actions/settings'
 import { siteConfig } from '@/config/site'
-import type { SiteSetting } from '@prisma/client'
+import type { SiteSetting } from '@/types/database'
 
 export function SettingsForm({
   settings,
@@ -17,6 +17,7 @@ export function SettingsForm({
 }) {
   const [pending, startTransition] = useTransition()
   const [errors, setErrors] = useState<Record<string, string[]>>({})
+  const [paymentMethod, setPaymentMethod] = useState<'BANK_TRANSFER' | 'PAYMENT_LINK'>(settings?.paymentMethod ?? 'BANK_TRANSFER')
 
   function onSubmit(formData: FormData) {
     setErrors({})
@@ -84,6 +85,39 @@ export function SettingsForm({
           />
         </Field>
       </fieldset>
+
+      <div className="mt-8 border-t border-line pt-6">
+        <h3 className="font-display text-base font-semibold">Paiement des commandes</h3>
+        <p className="mt-1 text-sm text-muted">Ces informations s’affichent après la création d’une commande. Le reçu ne confirme jamais le paiement.</p>
+        <fieldset className="mt-4 grid gap-4 sm:grid-cols-2" disabled={!canEdit || pending}>
+          <Field label="Mode de paiement" htmlFor="paymentMethod" required error={errors.paymentMethod?.[0]}>
+            <Select id="paymentMethod" name="paymentMethod" value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value as typeof paymentMethod)}>
+              <option value="BANK_TRANSFER">Virement bancaire (RIB)</option>
+              <option value="PAYMENT_LINK">Lien de paiement</option>
+            </Select>
+          </Field>
+          {paymentMethod === 'BANK_TRANSFER' ? (
+            <>
+              <Field label="Titulaire du compte" htmlFor="bankAccountHolder" required error={errors.bankAccountHolder?.[0]}>
+                <Input id="bankAccountHolder" name="bankAccountHolder" defaultValue={settings?.bankAccountHolder ?? ''} />
+              </Field>
+              <Field label="Banque" htmlFor="bankName" error={errors.bankName?.[0]}>
+                <Input id="bankName" name="bankName" defaultValue={settings?.bankName ?? ''} />
+              </Field>
+              <Field label="IBAN" htmlFor="iban" required error={errors.iban?.[0]}>
+                <Input id="iban" name="iban" autoComplete="off" defaultValue={settings?.iban ?? ''} />
+              </Field>
+              <Field label="BIC" htmlFor="bic" required error={errors.bic?.[0]}>
+                <Input id="bic" name="bic" autoComplete="off" defaultValue={settings?.bic ?? ''} />
+              </Field>
+            </>
+          ) : (
+            <Field label="Lien sécurisé de paiement" htmlFor="paymentLinkUrl" required error={errors.paymentLinkUrl?.[0]}>
+              <Input id="paymentLinkUrl" name="paymentLinkUrl" type="url" defaultValue={settings?.paymentLinkUrl ?? ''} placeholder="https://…" />
+            </Field>
+          )}
+        </fieldset>
+      </div>
 
       {canEdit ? (
         <Button type="submit" className="mt-6" loading={pending}>

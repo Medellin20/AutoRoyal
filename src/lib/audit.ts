@@ -1,5 +1,5 @@
 import { headers } from 'next/headers'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin, newId } from '@/lib/supabase'
 
 type AuditInput = {
   userId?: string | null
@@ -18,17 +18,12 @@ export async function logAudit(input: AuditInput): Promise<void> {
       headers().get('x-real-ip') ??
       null
 
-    await prisma.auditLog.create({
-      data: {
-        userId: input.userId ?? null,
-        userEmail: input.userEmail,
-        action: input.action,
-        entity: input.entity,
-        entityId: input.entityId ?? null,
-        metadata: (input.metadata ?? {}) as object,
-        ip,
-      },
+    const { error } = await getSupabaseAdmin().from('audit_logs').insert({
+      id: newId(), userId: input.userId ?? null, userEmail: input.userEmail,
+      action: input.action, entity: input.entity, entityId: input.entityId ?? null,
+      metadata: input.metadata ?? {}, ip,
     })
+    if (error) throw error
   } catch (error) {
     console.error('[audit] echec de journalisation', error)
   }

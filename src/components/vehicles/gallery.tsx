@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Expand, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { VehicleImage } from '@prisma/client'
+import type { VehicleImage } from '@/types/database'
 
 const PLACEHOLDER = '/images/placeholder-vehicle.svg'
 

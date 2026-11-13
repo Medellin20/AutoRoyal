@@ -1,7 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseAdmin, getSupabasePublic, newId } from '@/lib/supabase'
+import { saveCustomer } from '@/server/customers'
 import { reservationSchema, reservationStatusSchema, internalNoteSchema } from '@/validations/reservation'
 import { diffInDays, makeReference } from '@/lib/utils'
 import { siteConfig } from '@/config/site'
@@ -17,16 +18,13 @@ export async function isVehicleAvailable(
   endDate: Date,
   excludeId?: string,
 ): Promise<boolean> {
-  const overlap = await prisma.reservation.count({
-    where: {
-      vehicleId,
-      id: excludeId ? { not: excludeId } : undefined,
-      status: { in: ['PENDING', 'CONFIRMED', 'ONGOING'] },
-      startDate: { lt: endDate },
-      endDate: { gt: startDate },
-    },
-  })
-  return overlap === 0
+  let query = getSupabaseAdmin().from('reservations').select('id')
+    .eq('vehicleId', vehicleId).in('status', ['PENDING', 'CONFIRMED', 'ONGOING'])
+    .lt('startDate', endDate.toISOString()).gt('endDate', startDate.toISOString())
+  if (excludeId) query = query.neq('id', excludeId)
+  const { data, error } = await query
+  if (error) throw error
+  return !data?.length
 }
 
 /** Calcule le tarif : degressif semaine/mois si les tarifs existent. */
@@ -68,13 +66,10 @@ export async function createReservation(formData: FormData): Promise<ActionResul
 
   const data = parsed.data
 
-  const vehicle = await prisma.vehicle.findUnique({
-    where: { id: data.vehicleId },
-    select: {
-      id: true, brand: true, model: true, status: true, offerType: true,
-      dailyPrice: true, weeklyPrice: true, monthlyPrice: true, published: true,
-    },
-  })
+  const { data: vehicle, error: vehicleError } = await getSupabasePublic().from('vehicles')
+    .select('id,brand,model,status,offerType,dailyPrice,weeklyPrice,monthlyPrice,published')
+    .eq('id', data.vehicleId).maybeSingle()
+  if (vehicleError) return { ok: false, message: 'Impossible de verifier ce vehicule.' }
 
   if (!vehicle || !vehicle.published || vehicle.offerType === 'SALE') {
     return { ok: false, message: "Ce vehicule n'est pas proposé a la location." }
@@ -103,32 +98,20 @@ export async function createReservation(formData: FormData): Promise<ActionResul
     data.pickupPlace !== data.returnPlace,
   )
 
-  const customer = await prisma.customer.upsert({
-    where: { email_phone: { email: data.email.toLowerCase(), phone: data.phone } },
-    update: { fullName: data.fullName, address: data.address },
-    create: {
-      fullName: data.fullName,
-      email: data.email.toLowerCase(),
-      phone: data.phone,
-      address: data.address,
-    },
-  })
+  let customer
+  try {
+    customer = await saveCustomer({ fullName: data.fullName, email: data.email, phone: data.phone, address: data.address })
+  } catch {
+    return { ok: false, message: 'Impossible d enregistrer les coordonnees du client.' }
+  }
 
-  const reservation = await prisma.reservation.create({
-    data: {
-      reference: makeReference('RES'),
-      vehicleId: vehicle.id,
-      customerId: customer.id,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      pickupPlace: data.pickupPlace,
-      returnPlace: data.returnPlace,
-      days,
-      totalPrice: quote.total,
-      extraFees: quote.extraFees,
-      message: data.message || null,
-    },
-  })
+  const { data: reservation, error } = await getSupabaseAdmin().from('reservations').insert({
+    id: newId(), reference: makeReference('RES'), vehicleId: vehicle.id, customerId: customer.id,
+    startDate: data.startDate.toISOString(), endDate: data.endDate.toISOString(),
+    pickupPlace: data.pickupPlace, returnPlace: data.returnPlace, days,
+    totalPrice: quote.total, extraFees: quote.extraFees, message: data.message || null,
+  }).select('reference').single()
+  if (error) return { ok: false, message: 'Impossible d enregistrer la demande de reservation.' }
 
   revalidatePath('/admin/reservations')
   return {
@@ -147,21 +130,20 @@ export async function updateReservationStatus(id: string, status: string): Promi
   const parsed = reservationStatusSchema.safeParse({ id, status })
   if (!parsed.success) return { ok: false, message: 'Statut invalide.' }
 
-  const reservation = await prisma.reservation.update({
-    where: { id },
-    data: { status: parsed.data.status },
-    include: { vehicle: { select: { id: true } } },
-  })
+  const { data: reservation, error } = await getSupabaseAdmin().from('reservations')
+    .update({ status: parsed.data.status, updatedAt: new Date().toISOString() })
+    .eq('id', id).select('vehicleId').single()
+  if (error || !reservation) return { ok: false, message: 'Reservation introuvable.' }
 
   // Le statut du vehicule suit celui de la reservation.
   if (parsed.data.status === 'ONGOING') {
-    await prisma.vehicle.update({ where: { id: reservation.vehicleId }, data: { status: 'RENTED' } })
+    await getSupabaseAdmin().from('vehicles').update({ status: 'RENTED', updatedAt: new Date().toISOString() }).eq('id', reservation.vehicleId)
   }
   if (['COMPLETED', 'CANCELLED', 'REFUSED'].includes(parsed.data.status)) {
-    await prisma.vehicle.update({ where: { id: reservation.vehicleId }, data: { status: 'AVAILABLE' } })
+    await getSupabaseAdmin().from('vehicles').update({ status: 'AVAILABLE', updatedAt: new Date().toISOString() }).eq('id', reservation.vehicleId)
   }
   if (parsed.data.status === 'CONFIRMED') {
-    await prisma.vehicle.update({ where: { id: reservation.vehicleId }, data: { status: 'RESERVED' } })
+    await getSupabaseAdmin().from('vehicles').update({ status: 'RESERVED', updatedAt: new Date().toISOString() }).eq('id', reservation.vehicleId)
   }
 
   await logAudit({
@@ -183,7 +165,8 @@ export async function addReservationNote(id: string, note: string): Promise<Acti
   const parsed = internalNoteSchema.safeParse({ id, note })
   if (!parsed.success) return { ok: false, message: 'Note invalide.' }
 
-  await prisma.reservation.update({ where: { id }, data: { internalNote: parsed.data.note } })
+  const { error } = await getSupabaseAdmin().from('reservations').update({ internalNote: parsed.data.note }).eq('id', id)
+  if (error) return { ok: false, message: 'Impossible d enregistrer la note.' }
   await logAudit({
     userId: user.id,
     userEmail: user.email ?? '',

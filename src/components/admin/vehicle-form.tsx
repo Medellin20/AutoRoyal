@@ -8,9 +8,9 @@ import { Button, ButtonLink } from '@/components/ui/button'
 import { Checkbox, Field, Input, Select, Textarea } from '@/components/ui/field'
 import { createVehicle, updateVehicle } from '@/server/actions/vehicle'
 import {
-  categoryLabels, fuelLabels, offerTypeLabels, transmissionLabels, vehicleStatusLabels,
+  categoryLabels, damageLevelLabels, fuelLabels, transmissionLabels, vehicleStatusLabels,
 } from '@/lib/labels'
-import type { Vehicle } from '@prisma/client'
+import type { Vehicle } from '@/types/database'
 
 type Props = { vehicle?: Vehicle }
 
@@ -88,11 +88,7 @@ export function VehicleForm({ vehicle }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [errors, setErrors] = useState<Record<string, string[]>>({})
-  const [offerType, setOfferType] = useState(vehicle?.offerType ?? 'BOTH')
-
   const isEdit = Boolean(vehicle)
-  const showSale = offerType !== 'RENT'
-  const showRent = offerType !== 'SALE'
 
   function onSubmit(formData: FormData) {
     setErrors({})
@@ -117,22 +113,13 @@ export function VehicleForm({ vehicle }: Props) {
       <section className="rounded-card border border-line bg-white p-6 shadow-soft">
         <h2 className="font-display text-lg font-semibold">Identification</h2>
 
+        <input type="hidden" name="offerType" value="SALE" />
         <fieldset className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" disabled={pending}>
+          <Field label="Titre de l’annonce" htmlFor="title" required error={errors.title?.[0]}>
+            <Input id="title" name="title" defaultValue={vehicle?.title} placeholder="Ex. Peugeot 308 accidentée, 2021" required />
+          </Field>
           <Field label="Reference interne" htmlFor="reference" required error={errors.reference?.[0]}>
             <Input id="reference" name="reference" defaultValue={vehicle?.reference} placeholder="VEH-0001" required />
-          </Field>
-
-          <Field label="Type d offre" htmlFor="offerType" required error={errors.offerType?.[0]}>
-            <Select
-              id="offerType"
-              name="offerType"
-              value={offerType}
-              onChange={(e) => setOfferType(e.target.value as typeof offerType)}
-            >
-              {Object.entries(offerTypeLabels).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </Select>
           </Field>
 
           <Field label="Statut" htmlFor="status" required error={errors.status?.[0]}>
@@ -163,45 +150,81 @@ export function VehicleForm({ vehicle }: Props) {
             </Select>
           </Field>
 
+          <Field label="Type de véhicule" htmlFor="vehicleType" required error={errors.vehicleType?.[0]}>
+            <Select id="vehicleType" name="vehicleType" defaultValue={vehicle?.vehicleType ?? 'VOITURE'}>
+              <option value="VOITURE">Voiture</option><option value="UTILITAIRE">Utilitaire</option>
+              <option value="MOTO">Moto</option><option value="CAMION">Camion</option><option value="AUTRE">Autre</option>
+            </Select>
+          </Field>
+
           <Field label="Annee" htmlFor="year" required error={errors.year?.[0]}>
             <Input id="year" name="year" type="number" min={1980} defaultValue={vehicle?.year ?? new Date().getFullYear()} required />
           </Field>
 
-          <Field label="Numero de chassis" htmlFor="vin" error={errors.vin?.[0]} hint="Facultatif, non affiche publiquement.">
-            <Input id="vin" name="vin" defaultValue={vehicle?.vin ?? ''} />
+          <Field label="VIN / numéro de châssis" htmlFor="vin" error={errors.vin?.[0]} hint="Facultatif, non affiché publiquement.">
+            <Input id="vin" name="vin" defaultValue={vehicle?.vin ?? ''} maxLength={24} />
           </Field>
         </fieldset>
       </section>
 
       <section className="rounded-card border border-line bg-white p-6 shadow-soft">
-        <h2 className="font-display text-lg font-semibold">Tarifs</h2>
+        <h2 className="font-display text-lg font-semibold">État après accident</h2>
+
+        <fieldset className="mt-5 grid gap-4 sm:grid-cols-2" disabled={pending}>
+          <Field label="Niveau de dommages" htmlFor="damageLevel" required error={errors.damageLevel?.[0]}>
+            <Select id="damageLevel" name="damageLevel" defaultValue={vehicle?.damageLevel ?? 'A_DEFINIR'}>
+              {Object.entries(damageLevelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </Select>
+          </Field>
+          <Field label="État de fonctionnement" htmlFor="runningCondition" required error={errors.runningCondition?.[0]}>
+            <Select id="runningCondition" name="runningCondition" defaultValue={vehicle?.runningCondition ?? 'A_VERIFIER'}>
+              <option value="ROULANT">Run &amp; Drive</option><option value="DEMARRE">Démarre uniquement</option>
+              <option value="NON_ROULANT">Ne démarre pas</option><option value="A_VERIFIER">État inconnu</option>
+            </Select>
+          </Field>
+          <Field label="État de la carrosserie" htmlFor="bodyCondition" required error={errors.bodyCondition?.[0]}>
+            <Select id="bodyCondition" name="bodyCondition" defaultValue={vehicle?.bodyCondition ?? 'A_VERIFIER'}>
+              <option value="BON">Bon</option><option value="MOYEN">Moyen</option><option value="ENDOMMAGE">Endommagé</option><option value="A_VERIFIER">À vérifier</option>
+            </Select>
+          </Field>
+          <Field label="État du titre" htmlFor="titleStatus" required error={errors.titleStatus?.[0]}>
+            <Select id="titleStatus" name="titleStatus" defaultValue={vehicle?.titleStatus ?? 'A_VERIFIER'}>
+              <option value="A_VERIFIER">À vérifier</option><option value="CLAIR">Clair</option><option value="ACCIDENTE">Accidenté</option><option value="MANQUANT">Manquant</option>
+            </Select>
+          </Field>
+          <div className="sm:col-span-2">
+            <TagInput name="damageTypes" label="Zones ou types de dommages" initial={vehicle?.damageTypes ?? []} placeholder="Avant, aile gauche, airbags..." />
+          </div>
+          <div className="sm:col-span-2">
+            <Field label="Description des dommages" htmlFor="damageDescription" required error={errors.damageDescription?.[0]}>
+              <Textarea id="damageDescription" name="damageDescription" rows={4} defaultValue={vehicle?.damageDescription} placeholder="Décrivez précisément les dommages connus et les éléments à contrôler." required />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <TagInput name="requiredDocuments" label="Documents et rapports disponibles" initial={vehicle?.requiredDocuments ?? []} placeholder="Carte grise, rapport d’expertise..." />
+          </div>
+        </fieldset>
+      </section>
+
+      <section className="rounded-card border border-line bg-white p-6 shadow-soft">
+        <h2 className="font-display text-lg font-semibold">Vente à prix fixe</h2>
 
         <fieldset className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" disabled={pending}>
-          {showSale && (
-            <Field label="Prix de vente" htmlFor="salePrice" required error={errors.salePrice?.[0]}>
-              <Input id="salePrice" name="salePrice" type="number" min={0} step={10000} defaultValue={vehicle?.salePrice ? Number(vehicle.salePrice) : ''} />
-            </Field>
-          )}
-
-          {showRent && (
-            <>
-              <Field label="Tarif journalier" htmlFor="dailyPrice" required error={errors.dailyPrice?.[0]}>
-                <Input id="dailyPrice" name="dailyPrice" type="number" min={0} step={1000} defaultValue={vehicle?.dailyPrice ? Number(vehicle.dailyPrice) : ''} />
-              </Field>
-
-              <Field label="Tarif hebdomadaire" htmlFor="weeklyPrice" error={errors.weeklyPrice?.[0]}>
-                <Input id="weeklyPrice" name="weeklyPrice" type="number" min={0} step={1000} defaultValue={vehicle?.weeklyPrice ? Number(vehicle.weeklyPrice) : ''} />
-              </Field>
-
-              <Field label="Tarif mensuel" htmlFor="monthlyPrice" error={errors.monthlyPrice?.[0]}>
-                <Input id="monthlyPrice" name="monthlyPrice" type="number" min={0} step={5000} defaultValue={vehicle?.monthlyPrice ? Number(vehicle.monthlyPrice) : ''} />
-              </Field>
-
-              <Field label="Caution" htmlFor="deposit" error={errors.deposit?.[0]}>
-                <Input id="deposit" name="deposit" type="number" min={0} step={5000} defaultValue={vehicle?.deposit ? Number(vehicle.deposit) : ''} />
-              </Field>
-            </>
-          )}
+          <Field label="Prix de vente" htmlFor="salePrice" required error={errors.salePrice?.[0]}>
+            <Input id="salePrice" name="salePrice" type="number" min={0} step={100} defaultValue={vehicle?.salePrice ? Number(vehicle.salePrice) : ''} />
+          </Field>
+          <Field label="Devise" htmlFor="currency" required error={errors.currency?.[0]}>
+            <Select id="currency" name="currency" defaultValue={vehicle?.currency ?? 'EUR'}>
+              <option value="EUR">EUR — Euro</option><option value="USD">USD — Dollar</option><option value="GBP">GBP — Livre sterling</option><option value="XOF">XOF — Franc CFA</option>
+            </Select>
+          </Field>
+          <Field label="Acompte éventuel" htmlFor="deposit" error={errors.deposit?.[0]}>
+            <Input id="deposit" name="deposit" type="number" min={0} step={50} defaultValue={vehicle?.deposit ? Number(vehicle.deposit) : ''} />
+          </Field>
+          <Field label="Quantité disponible" htmlFor="quantity" required error={errors.quantity?.[0]}>
+            <Input id="quantity" name="quantity" type="number" min={0} max={1000} defaultValue={vehicle?.quantity ?? 1} required />
+          </Field>
+          <div className="flex items-end pb-2"><Checkbox name="internationalSale" label="Vente internationale possible" defaultChecked={vehicle?.internationalSale} /></div>
         </fieldset>
       </section>
 
@@ -211,6 +234,21 @@ export function VehicleForm({ vehicle }: Props) {
         <fieldset className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" disabled={pending}>
           <Field label="Kilometrage" htmlFor="mileage" required error={errors.mileage?.[0]}>
             <Input id="mileage" name="mileage" type="number" min={0} defaultValue={vehicle?.mileage ?? 0} required />
+          </Field>
+          <Field label="Nombre de clés" htmlFor="keysCount" required error={errors.keysCount?.[0]}>
+            <Input id="keysCount" name="keysCount" type="number" min={0} max={20} defaultValue={vehicle?.keysCount ?? 1} required />
+          </Field>
+
+          <Field label="Motorisation" htmlFor="engine" required error={errors.engine?.[0]}>
+            <Input id="engine" name="engine" defaultValue={vehicle?.engine} placeholder="2.0 TDI, électrique..." required />
+          </Field>
+          <Field label="Cylindrée (cm³)" htmlFor="displacement" required error={errors.displacement?.[0]}>
+            <Input id="displacement" name="displacement" type="number" min={0} max={20000} defaultValue={vehicle?.displacement ?? 0} required />
+          </Field>
+          <Field label="Transmission" htmlFor="drivetrain" required error={errors.drivetrain?.[0]}>
+            <Select id="drivetrain" name="drivetrain" defaultValue={vehicle?.drivetrain ?? 'AUTRE'}>
+              <option value="TRACTION">Traction</option><option value="PROPULSION">Propulsion</option><option value="INTEGRALE">Intégrale</option><option value="AUTRE">Autre / inconnue</option>
+            </Select>
           </Field>
 
           <Field label="Carburant" htmlFor="fuel" required error={errors.fuel?.[0]}>
@@ -248,6 +286,15 @@ export function VehicleForm({ vehicle }: Props) {
       </section>
 
       <section className="rounded-card border border-line bg-white p-6 shadow-soft">
+        <h2 className="font-display text-lg font-semibold">Localisation et vidéo</h2>
+        <fieldset className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" disabled={pending}>
+          <Field label="Ville" htmlFor="city" required error={errors.city?.[0]}><Input id="city" name="city" defaultValue={vehicle?.city} required /></Field>
+          <Field label="Pays" htmlFor="country" required error={errors.country?.[0]}><Input id="country" name="country" defaultValue={vehicle?.country ?? 'France'} required /></Field>
+          <Field label="Lien vidéo (facultatif)" htmlFor="videoUrl" error={errors.videoUrl?.[0]}><Input id="videoUrl" name="videoUrl" type="url" defaultValue={vehicle?.videoUrl ?? ''} placeholder="https://..." /></Field>
+        </fieldset>
+      </section>
+
+      <section className="rounded-card border border-line bg-white p-6 shadow-soft">
         <h2 className="font-display text-lg font-semibold">Contenu de la fiche</h2>
 
         <fieldset className="mt-5 space-y-5" disabled={pending}>
@@ -261,21 +308,6 @@ export function VehicleForm({ vehicle }: Props) {
             initial={vehicle?.features ?? []}
             placeholder="Climatisation, camera de recul..."
           />
-
-          {showRent && (
-            <>
-              <Field label="Conditions de location" htmlFor="rentalConditions" error={errors.rentalConditions?.[0]}>
-                <Textarea id="rentalConditions" name="rentalConditions" rows={4} defaultValue={vehicle?.rentalConditions ?? ''} />
-              </Field>
-
-              <TagInput
-                name="requiredDocuments"
-                label="Documents necessaires"
-                initial={vehicle?.requiredDocuments ?? []}
-                placeholder="Permis de conduire, piece d identite..."
-              />
-            </>
-          )}
 
           <div className="flex flex-wrap gap-6 border-t border-line pt-5">
             <Checkbox name="featured" label="Mettre en avant sur l accueil" defaultChecked={vehicle?.featured} />
