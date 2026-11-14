@@ -79,9 +79,6 @@ export function Footer() {
           <p>
             &copy; {new Date().getFullYear()} {siteConfig.legalName}. Tous droits reserves.
           </p>
-          <Link href="/admin/login" className="hover:text-accent">
-            Espace administrateur
-          </Link>
         </div>
       </div>
     </footer>
