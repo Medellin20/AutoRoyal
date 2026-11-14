@@ -19,7 +19,7 @@ export async function logAudit(input: AuditInput): Promise<void> {
       null
 
     const { error } = await getSupabaseAdmin().from('audit_logs').insert({
-      id: newId(), userId: input.userId ?? null, userEmail: input.userEmail,
+      id: newId(), userId: input.userId === 'env-admin' ? null : input.userId ?? null, userEmail: input.userEmail,
       action: input.action, entity: input.entity, entityId: input.entityId ?? null,
       metadata: input.metadata ?? {}, ip,
     })

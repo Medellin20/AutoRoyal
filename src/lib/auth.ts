@@ -1,7 +1,7 @@
 import type { NextAuthOptions, DefaultSession } from 'next-auth'
 import { getServerSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { getSupabasePublic } from '@/lib/supabase'
+import { createHash, timingSafeEqual } from 'node:crypto'
 import { loginSchema } from '@/validations/auth'
 import type { Role } from '@/types/database'
 
@@ -41,38 +41,24 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Mot de passe', type: 'password' },
-      },
+      name: 'AdminPassword',
+      credentials: { password: { label: 'Mot de passe', type: 'password' } },
       async authorize(credentials) {
         const parsed = loginSchema.safeParse(credentials)
-        if (!parsed.success) throw new Error('Identifiants invalides.')
+        if (!parsed.success) return null
 
-        const { email, password } = parsed.data
-        // Supabase Auth owns password validation and its own abuse protection.
-        const { data: authData, error: authError } = await getSupabasePublic().auth.signInWithPassword({
-          email: email.toLowerCase(),
-          password,
-        })
-        if (authError || !authData.user) throw new Error('Identifiants invalides.')
+        const configuredPassword = process.env.ADMIN_PASSWORD
+        if (!configuredPassword) throw new Error('ADMIN_PASSWORD n’est pas configuré dans .env.')
 
-        const userEmail = authData.user.email?.toLowerCase() ?? email.toLowerCase()
-        const metadataRole = authData.user.app_metadata?.role
-        const role = (['SUPER_ADMIN', 'ADMIN', 'MANAGER'].includes(metadataRole)
-          ? metadataRole
-          : undefined) as Role | undefined
-        const isConfiguredAdmin = userEmail === process.env.ADMIN_EMAIL?.trim().toLowerCase()
-        if (metadataRole === 'DISABLED' || (!role && !isConfiguredAdmin)) {
-          throw new Error('Ce compte ne dispose pas des droits administrateur.')
-        }
+        const submittedDigest = createHash('sha256').update(parsed.data.password).digest()
+        const configuredDigest = createHash('sha256').update(configuredPassword).digest()
+        if (!timingSafeEqual(submittedDigest, configuredDigest)) return null
 
         return {
-          id: authData.user.id,
-          name: authData.user.user_metadata?.name ?? userEmail,
-          email: userEmail,
-          role: role ?? 'SUPER_ADMIN',
+          id: 'env-admin',
+          name: process.env.ADMIN_NAME?.trim() || 'Administrateur',
+          email: process.env.ADMIN_EMAIL?.trim().toLowerCase() || 'administrateur@autoroyal.local',
+          role: 'SUPER_ADMIN',
         }
       },
     }),

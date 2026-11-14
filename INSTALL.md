@@ -12,11 +12,10 @@ Dans `.env`, définissez les trois valeurs API du projet Supabase :
 - `SUPABASE_SERVICE_ROLE_KEY` (serveur uniquement)
 
 Exécutez les migrations de `supabase/migrations` dans l’ordre des noms depuis l’éditeur SQL du
-tableau de bord Supabase. Puis définissez `NEXTAUTH_SECRET`, `ADMIN_EMAIL` et `ADMIN_PASSWORD`.
-Créez l’administrateur initial avec :
+tableau de bord Supabase. Puis définissez `NEXTAUTH_SECRET` et `ADMIN_PASSWORD`. L’accès admin
+utilise uniquement ce mot de passe; aucun compte Auth ou e-mail n’est nécessaire.
 
 ```bash
-npm run admin:create
 npm run dev
 ```
 

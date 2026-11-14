@@ -12,8 +12,10 @@ cp .env.example .env
 ```
 
 Renseignez les trois variables Supabase depuis les paramètres API du projet. La clé
-`SUPABASE_SERVICE_ROLE_KEY` est strictement réservée au serveur. Les autres variables décrites dans
-`.env.example` configurent NextAuth, l’URL du site, l’administrateur et Cloudinary.
+`SUPABASE_SERVICE_ROLE_KEY` est strictement réservée au serveur et reste nécessaire pour charger
+les données de l’administration. Définissez également `ADMIN_PASSWORD` et `NEXTAUTH_SECRET` dans
+`.env`. Le mot de passe est le seul identifiant demandé sur `/admin/login`; aucun compte Supabase
+Auth ni adresse e-mail n’est requis pour se connecter.
 
 ## Base Supabase et paiement
 
@@ -32,17 +34,8 @@ Pour envoyer les alertes e-mail de nouvelles commandes, configurez `RESEND_API_K
 vide. Sans configuration Resend, la commande reste visible dans `/admin/commandes` et son état
 d’alerte est indiqué dans l’administration.
 
-Créez le premier compte administrateur après avoir renseigné `ADMIN_EMAIL` et `ADMIN_PASSWORD` :
-
-```bash
-npm run admin:create
-```
-
-La commande crée le compte dans Supabase Auth et son profil de rôle. Si l'adresse existe déjà dans
-Supabase Auth, elle conserve son mot de passe et lui attribue le rôle super administrateur. Pour utiliser un compte créé
-manuellement dans **Supabase → Authentication → Users**, définissez `ADMIN_EMAIL` avec exactement
-son adresse dans les variables d'environnement de l'application. Seuls les identifiants validés par
-Supabase Auth peuvent ouvrir une session.
+`ADMIN_EMAIL` est facultatif et sert uniquement de destinataire de secours pour les alertes et le
+journal admin. Après toute modification des variables d’environnement en production, redéployez le site.
 
 ## Lancer le site
 

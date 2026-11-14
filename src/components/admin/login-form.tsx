@@ -29,24 +29,29 @@ export function LoginForm() {
     }
 
     setLoading(true)
-    const result = await signIn('credentials', {
-      email: parsed.data.email,
-      password: parsed.data.password,
-      redirect: false,
-    })
-    setLoading(false)
+    try {
+      const result = await signIn('credentials', {
+        password: parsed.data.password,
+        redirect: false,
+      })
 
-    if (result?.error) {
-      setError(
-        result.error === 'CredentialsSignin'
-          ? 'E-mail ou mot de passe incorrect.'
-          : result.error,
-      )
-      return
+      if (result?.error) {
+        setError(
+          result.error === 'CredentialsSignin'
+            ? 'Mot de passe incorrect.'
+            : result.error,
+        )
+        return
+      }
+
+      const callbackUrl = params.get('callbackUrl')
+      router.push(callbackUrl?.startsWith('/admin') ? callbackUrl : '/admin')
+      router.refresh()
+    } catch {
+      setError('Connexion impossible. Vérifiez la configuration et réessayez.')
+    } finally {
+      setLoading(false)
     }
-
-    router.push(params.get('callbackUrl') ?? '/admin')
-    router.refresh()
   }
 
   return (
@@ -57,10 +62,6 @@ export function LoginForm() {
           {error}
         </p>
       )}
-
-      <Field label="Adresse e-mail" htmlFor="email" required error={fieldErrors.email?.[0]}>
-        <Input id="email" name="email" type="email" autoComplete="username" required autoFocus />
-      </Field>
 
       <Field label="Mot de passe" htmlFor="password" required error={fieldErrors.password?.[0]}>
         <Input id="password" name="password" type="password" autoComplete="current-password" required />

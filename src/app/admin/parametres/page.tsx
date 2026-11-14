@@ -3,36 +3,32 @@ import { auth } from '@/lib/auth'
 import { can } from '@/lib/permissions'
 import { PageHeader } from '@/components/admin/page-header'
 import { SettingsForm } from '@/components/admin/settings-form'
-import { UserManager } from '@/components/admin/user-manager'
 import { formatDateTime } from '@/lib/utils'
 import { siteConfig } from '@/config/site'
-import type { SiteSetting, User } from '@/types/database'
+import type { SiteSetting } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Parametres' }
 
 export default async function SettingsPage() {
   const session = await auth()
-  const isSuperAdmin = can(session?.user.role, 'user:manage')
 
   const db = getSupabaseAdmin()
-  const [settingsResult, usersResult, logsResult] = await Promise.all([
+  const [settingsResult, logsResult] = await Promise.all([
     db.from('site_settings').select('*').eq('id', 'default').maybeSingle(),
-    isSuperAdmin ? db.from('users').select('*').order('createdAt') : Promise.resolve({ data: [], error: null }),
     can(session?.user.role, 'audit:read')
       ? db.from('audit_logs').select('id,userEmail,action,entity,createdAt').order('createdAt', { ascending: false }).limit(15)
       : Promise.resolve({ data: [], error: null }),
   ])
-  if (settingsResult.error || usersResult.error || logsResult.error) throw new Error('Lecture des parametres impossible.')
+  if (settingsResult.error || logsResult.error) throw new Error('Lecture des parametres impossible.')
   const settings = settingsResult.data as SiteSetting | null
-  const users = (usersResult.data ?? []) as User[]
   const logs = logsResult.data ?? []
 
   return (
     <>
       <PageHeader
         title="Parametres"
-        description="Coordonnees affichees sur le site, comptes de l equipe et journal des actions."
+        description="Coordonnees du site, informations de paiement et journal des actions."
       />
 
       <div className="space-y-6">
@@ -40,8 +36,6 @@ export default async function SettingsPage() {
           settings={settings}
           canEdit={can(session?.user.role, 'settings:update')}
         />
-
-        {isSuperAdmin && <UserManager users={users} currentUserId={session!.user.id} />}
 
         {logs.length > 0 && (
           <section className="rounded-card border border-line bg-white p-6 shadow-soft">
