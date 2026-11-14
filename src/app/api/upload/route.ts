@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getSupabaseAdmin, newId } from '@/lib/supabase'
-import { uploadImage, ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE } from '@/lib/cloudinary'
+import { uploadImage, deleteImage, ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE } from '@/lib/vehicle-media'
 
 export const runtime = 'nodejs'
 
@@ -49,12 +49,14 @@ export async function POST(request: Request) {
     }
   }
 
+  const created = []
+  const uploadedPaths: string[] = []
   try {
-    const created = []
     let position = count ?? 0
 
     for (const file of files) {
-      const { url, publicId } = await uploadImage(file)
+      const { url, publicId } = await uploadImage(file, vehicleId)
+      uploadedPaths.push(publicId)
       const { data: image, error } = await db.from('vehicle_images').insert({
         id: newId(), vehicleId, url, publicId, alt: `${vehicle.brand} ${vehicle.model}`,
         position, isMain: position === 0,
@@ -66,6 +68,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ images: created }, { status: 201 })
   } catch (error) {
+    if (created.length) {
+      await db.from('vehicle_images').delete().in('id', created.map((image) => image.id))
+    }
+    await Promise.allSettled(uploadedPaths.map(deleteImage))
     console.error('[upload]', error)
     return NextResponse.json({ message: 'Televersement impossible. Reessayez.' }, { status: 500 })
   }

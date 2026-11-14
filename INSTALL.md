@@ -14,6 +14,8 @@ Dans `.env`, définissez les trois valeurs API du projet Supabase :
 Exécutez les migrations de `supabase/migrations` dans l’ordre des noms depuis l’éditeur SQL du
 tableau de bord Supabase. Puis définissez `NEXTAUTH_SECRET` et `ADMIN_PASSWORD`. L’accès admin
 utilise uniquement ce mot de passe; aucun compte Auth ou e-mail n’est nécessaire.
+La migration `20261114000600_vehicle_images_bucket.sql` prépare le stockage Supabase des photos
+administrées depuis la fiche véhicule.
 
 ```bash
 npm run dev

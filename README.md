@@ -20,9 +20,9 @@ Auth ni adresse e-mail n’est requis pour se connecter.
 ## Base Supabase et paiement
 
 Exécutez les migrations du dossier `supabase/migrations` dans l’ordre des noms, depuis l’éditeur SQL
-du tableau de bord Supabase. Elles créent le schéma initial puis les champs d’état accidenté, les
-commandes de vente, le suivi des alertes et les fonctions transactionnelles. Elles ne chargent pas
-de véhicules de démonstration.
+du tableau de bord Supabase. Elles créent le schéma initial, le suivi des commandes, les fonctions
+transactionnelles et le stockage public des photos de véhicules. Elles ne chargent pas de véhicules de
+démonstration.
 
 Dans `/admin/parametres`, configurez soit le RIB, soit le lien sécurisé de paiement avant d’accepter
 des commandes. Une commande réserve le véhicule. Le paiement reste en attente jusqu’à ce qu’un

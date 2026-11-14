@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import {
-  Banknote, Car, CheckCircle2, Eye, ShoppingBag,
-} from 'lucide-react'
+import { Eye, Plus } from 'lucide-react'
 import { PageHeader } from '@/components/admin/page-header'
 import { StatCard } from '@/components/admin/stat-card'
 import { RevenueChart } from '@/components/admin/revenue-chart'
 import { Badge } from '@/components/ui/badge'
+import { ButtonLink } from '@/components/ui/button'
 import { getDashboardStats } from '@/server/queries'
 import { formatPrice, formatDate } from '@/lib/utils'
 
@@ -15,12 +14,12 @@ export default async function AdminDashboard() {
   const stats = await getDashboardStats()
 
   const cards = [
-    { label: 'Vehicules au parc', value: stats.totalVehicles, icon: Car, tone: 'accent' as const },
-    { label: 'Disponibles', value: stats.available, icon: CheckCircle2, tone: 'success' as const },
-    { label: 'Vendus', value: stats.sold, icon: Car, tone: 'gold' as const },
-    { label: 'Commandes à payer', value: stats.pendingOrders, icon: ShoppingBag, tone: 'warning' as const },
-    { label: 'Paiements vérifiés', value: stats.confirmedOrders, icon: CheckCircle2, tone: 'success' as const },
-    { label: 'Ventes confirmées', value: formatPrice(stats.revenue), icon: Banknote, tone: 'gold' as const },
+    { label: 'Vehicules au parc', value: stats.totalVehicles, icon: 'car' as const, tone: 'accent' as const },
+    { label: 'Disponibles', value: stats.available, icon: 'check' as const, tone: 'success' as const },
+    { label: 'Vendus', value: stats.sold, icon: 'car' as const, tone: 'gold' as const },
+    { label: 'Commandes à payer', value: stats.pendingOrders, icon: 'shopping' as const, tone: 'warning' as const },
+    { label: 'Paiements vérifiés', value: stats.confirmedOrders, icon: 'check' as const, tone: 'success' as const },
+    { label: 'Ventes confirmées', value: formatPrice(stats.revenue), icon: 'banknote' as const, tone: 'gold' as const },
   ]
 
   return (
@@ -28,6 +27,12 @@ export default async function AdminDashboard() {
       <PageHeader
         title="Tableau de bord"
         description="Véhicules en vente, commandes récentes et paiements vérifiés."
+        action={(
+          <ButtonLink href="/admin/vehicules/nouveau">
+            <Plus className="h-4 w-4" />
+            Ajouter un véhicule
+          </ButtonLink>
+        )}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

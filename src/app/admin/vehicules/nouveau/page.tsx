@@ -8,7 +8,7 @@ export default function NewVehiclePage() {
     <>
       <PageHeader
         title="Ajouter un vehicule"
-        description="Creez la fiche, puis ajoutez les photos a l etape suivante."
+        description="Renseignez les informations. Après l’enregistrement, ajoutez les photos et choisissez l’image principale avant publication."
       />
       <VehicleForm />
     </>

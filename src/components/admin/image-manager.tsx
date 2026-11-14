@@ -94,7 +94,7 @@ export function ImageManager({
         <div>
           <h2 className="font-display text-lg font-semibold">Photos</h2>
           <p className="mt-1 text-sm text-muted">
-            JPEG, PNG, WebP ou AVIF. 5 Mo maximum par fichier. La premiere image sert de vignette.
+            JPEG, PNG, WebP ou AVIF, 5 Mo maximum par image. Choisissez l’image principale avec l’étoile et réorganisez-les avec les flèches.
           </p>
         </div>
 

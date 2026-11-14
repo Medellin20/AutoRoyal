@@ -35,7 +35,7 @@ export default async function AdminVehiclesPage({
     <>
       <PageHeader
         title="Vehicules"
-        description={`${vehicles.length} fiche(s) au total.`}
+        description={`${vehicles.length} fiche(s) au total. Les nouvelles fiches sont enregistrées en brouillon avant l’ajout des photos.`}
         action={
           <ButtonLink href="/admin/vehicules/nouveau">
             <Plus className="h-4 w-4" />

@@ -1,24 +1,32 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type { LucideIcon } from 'lucide-react'
+import { Banknote, Car, CheckCircle2, ShoppingBag } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+const icons = {
+  car: Car,
+  check: CheckCircle2,
+  shopping: ShoppingBag,
+  banknote: Banknote,
+} as const
 
 export function StatCard({
   label,
   value,
-  icon: Icon,
+  icon,
   hint,
   index = 0,
   tone = 'accent',
 }: {
   label: string
   value: string | number
-  icon: LucideIcon
+  icon: keyof typeof icons
   hint?: string
   index?: number
   tone?: 'accent' | 'success' | 'warning' | 'gold'
 }) {
+  const Icon = icons[icon]
   const tones = {
     accent: 'bg-accent-soft text-accent',
     success: 'bg-success/10 text-success',

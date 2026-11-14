@@ -20,11 +20,15 @@ function TagInput({
   label,
   initial = [],
   placeholder,
+  required = false,
+  error,
 }: {
   name: string
   label: string
   initial?: string[]
   placeholder: string
+  required?: boolean
+  error?: string
 }) {
   const [values, setValues] = useState<string[]>(initial)
   const [draft, setDraft] = useState('')
@@ -38,7 +42,9 @@ function TagInput({
 
   return (
     <div>
-      <p className="mb-1.5 block text-sm font-medium">{label}</p>
+      <p className="mb-1.5 block text-sm font-medium">
+        {label}{required && <span className="ml-1 text-danger" aria-hidden="true">*</span>}
+      </p>
 
       <div className="flex gap-2">
         <Input
@@ -80,6 +86,7 @@ function TagInput({
           ))}
         </ul>
       )}
+      {error && <p className="mt-1.5 text-xs text-danger">{error}</p>}
     </div>
   )
 }
@@ -99,7 +106,7 @@ export function VehicleForm({ vehicle }: Props) {
 
       if (result.ok) {
         toast.success(result.message ?? 'Enregistre.')
-        router.push('/admin/vehicules')
+        router.push(result.data?.id ? `/admin/vehicules/${result.data.id}` : '/admin/vehicules')
         router.refresh()
       } else {
         setErrors(result.fieldErrors ?? {})
@@ -118,11 +125,11 @@ export function VehicleForm({ vehicle }: Props) {
           <Field label="Titre de l’annonce" htmlFor="title" required error={errors.title?.[0]}>
             <Input id="title" name="title" defaultValue={vehicle?.title} placeholder="Ex. Peugeot 308 accidentée, 2021" required />
           </Field>
-          <Field label="Reference interne" htmlFor="reference" required error={errors.reference?.[0]}>
-            <Input id="reference" name="reference" defaultValue={vehicle?.reference} placeholder="VEH-0001" required />
+          <Field label="Référence interne" htmlFor="reference" error={errors.reference?.[0]} hint="Facultatif : une référence sera générée automatiquement si le champ reste vide.">
+            <Input id="reference" name="reference" defaultValue={vehicle?.reference} placeholder="Générée automatiquement" />
           </Field>
 
-          <Field label="Statut" htmlFor="status" required error={errors.status?.[0]}>
+          <Field label="Disponibilité" htmlFor="status" required error={errors.status?.[0]} hint="Le statut Brouillon ou Publié se règle séparément en bas du formulaire.">
             <Select id="status" name="status" defaultValue={vehicle?.status ?? 'AVAILABLE'}>
               {Object.entries(vehicleStatusLabels).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -193,7 +200,7 @@ export function VehicleForm({ vehicle }: Props) {
             </Select>
           </Field>
           <div className="sm:col-span-2">
-            <TagInput name="damageTypes" label="Zones ou types de dommages" initial={vehicle?.damageTypes ?? []} placeholder="Avant, aile gauche, airbags..." />
+            <TagInput name="damageTypes" label="Zones ou types de dommages" initial={vehicle?.damageTypes ?? []} placeholder="Avant, aile gauche, airbags..." required error={errors.damageTypes?.[0]} />
           </div>
           <div className="sm:col-span-2">
             <Field label="Description des dommages" htmlFor="damageDescription" required error={errors.damageDescription?.[0]}>
@@ -211,7 +218,7 @@ export function VehicleForm({ vehicle }: Props) {
 
         <fieldset className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" disabled={pending}>
           <Field label="Prix de vente" htmlFor="salePrice" required error={errors.salePrice?.[0]}>
-            <Input id="salePrice" name="salePrice" type="number" min={0} step={100} defaultValue={vehicle?.salePrice ? Number(vehicle.salePrice) : ''} />
+            <Input id="salePrice" name="salePrice" type="number" min={1} step={100} defaultValue={vehicle?.salePrice ? Number(vehicle.salePrice) : ''} required />
           </Field>
           <Field label="Devise" htmlFor="currency" required error={errors.currency?.[0]}>
             <Select id="currency" name="currency" defaultValue={vehicle?.currency ?? 'EUR'}>
@@ -245,7 +252,7 @@ export function VehicleForm({ vehicle }: Props) {
           <Field label="Cylindrée (cm³)" htmlFor="displacement" required error={errors.displacement?.[0]}>
             <Input id="displacement" name="displacement" type="number" min={0} max={20000} defaultValue={vehicle?.displacement ?? 0} required />
           </Field>
-          <Field label="Transmission" htmlFor="drivetrain" required error={errors.drivetrain?.[0]}>
+          <Field label="Transmission / motricité" htmlFor="drivetrain" required error={errors.drivetrain?.[0]}>
             <Select id="drivetrain" name="drivetrain" defaultValue={vehicle?.drivetrain ?? 'AUTRE'}>
               <option value="TRACTION">Traction</option><option value="PROPULSION">Propulsion</option><option value="INTEGRALE">Intégrale</option><option value="AUTRE">Autre / inconnue</option>
             </Select>
@@ -259,7 +266,7 @@ export function VehicleForm({ vehicle }: Props) {
             </Select>
           </Field>
 
-          <Field label="Transmission" htmlFor="transmission" required error={errors.transmission?.[0]}>
+          <Field label="Boîte de vitesses" htmlFor="transmission" required error={errors.transmission?.[0]}>
             <Select id="transmission" name="transmission" defaultValue={vehicle?.transmission ?? 'MANUELLE'}>
               {Object.entries(transmissionLabels).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -311,10 +318,16 @@ export function VehicleForm({ vehicle }: Props) {
 
           <div className="flex flex-wrap gap-6 border-t border-line pt-5">
             <Checkbox name="featured" label="Mettre en avant sur l accueil" defaultChecked={vehicle?.featured} />
-            <Checkbox name="published" label="Publier la fiche" defaultChecked={vehicle?.published} />
+            {isEdit && <Checkbox name="published" label="Annonce publiée (sinon brouillon)" defaultChecked={vehicle?.published} />}
           </div>
         </fieldset>
       </section>
+
+      {!isEdit && (
+        <p className="rounded-xl border border-accent/20 bg-accent-soft p-4 text-sm text-ink">
+          La fiche sera d’abord enregistrée en brouillon. Vous pourrez ajouter plusieurs photos, choisir la photo principale, puis publier l’annonce.
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" loading={pending}>

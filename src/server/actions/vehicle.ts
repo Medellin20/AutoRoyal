@@ -7,7 +7,7 @@ import { slugify, makeReference } from '@/lib/utils'
 import { requireAdmin } from '@/lib/auth'
 import { can } from '@/lib/permissions'
 import { logAudit } from '@/lib/audit'
-import { deleteImage } from '@/lib/cloudinary'
+import { deleteImage } from '@/lib/vehicle-media'
 import type { ActionResult } from '@/types'
 import type { Vehicle, VehicleImage } from '@/types/database'
 
@@ -26,10 +26,11 @@ async function uniqueSlug(base: string, excludeId?: string): Promise<string> {
   }
 }
 
-function parseVehicleForm(formData: FormData) {
+function parseVehicleForm(formData: FormData, generatedReference?: string) {
   const raw = Object.fromEntries(formData) as Record<string, string>
   return vehicleSchema.safeParse({
     ...raw,
+    reference: raw.reference?.trim() || generatedReference || '',
     salePrice: raw.salePrice ?? '',
     dailyPrice: raw.dailyPrice ?? '',
     weeklyPrice: raw.weeklyPrice ?? '',
@@ -47,12 +48,11 @@ function parseVehicleForm(formData: FormData) {
 export async function createVehicle(formData: FormData): Promise<ActionResult<{ id: string }>> {
   const user = await requireAdmin()
   if (!can(user.role, 'vehicle:create')) return { ok: false, message: 'Votre role ne permet pas cette action.' }
-  const parsed = parseVehicleForm(formData)
+  const parsed = parseVehicleForm(formData, makeReference('VEH'))
   if (!parsed.success) return { ok: false, message: 'Corrigez les champs signales.', fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
 
   const d = parsed.data
   const db = getSupabaseAdmin()
-  if (d.published) return { ok: false, message: 'Enregistrez d’abord la fiche en brouillon, ajoutez ses photos, puis publiez-la.' }
   const { data: exists, error: lookupError } = await db.from('vehicles').select('id').eq('reference', d.reference).maybeSingle()
   if (lookupError) return { ok: false, message: 'Verification de la reference impossible.' }
   if (exists) return { ok: false, message: 'Reference deja utilisee.', fieldErrors: { reference: ['Reference deja utilisee.'] } }
@@ -61,14 +61,15 @@ export async function createVehicle(formData: FormData): Promise<ActionResult<{ 
     id: newId(), ...d,
     version: d.version || null, vin: d.vin || null, rentalConditions: d.rentalConditions || null,
     slug: await uniqueSlug(`${d.brand} ${d.model} ${d.year}`),
-    publishedAt: d.published ? new Date().toISOString() : null,
+    published: false,
+    publishedAt: null,
   }).select('id,reference').single()
   if (error || !vehicle) return { ok: false, message: 'Creation du vehicule impossible.' }
 
   await logAudit({ userId: user.id, userEmail: user.email ?? '', action: 'CREATE_VEHICLE', entity: 'Vehicle', entityId: vehicle.id, metadata: { reference: vehicle.reference } })
   revalidatePath('/admin/vehicules')
   revalidatePath('/vehicules')
-  return { ok: true, data: { id: vehicle.id }, message: 'Vehicule cree.' }
+  return { ok: true, data: { id: vehicle.id }, message: 'Fiche enregistrée en brouillon. Ajoutez maintenant ses photos.' }
 }
 
 export async function updateVehicle(id: string, formData: FormData): Promise<ActionResult> {
@@ -145,7 +146,7 @@ export async function duplicateVehicle(id: string): Promise<ActionResult<{ id: s
   if (error || !copy) return { ok: false, message: 'Duplication du vehicule impossible.' }
 
   const copiedImages = ((images ?? []) as VehicleImage[]).map((image) => ({
-    id: newId(), vehicleId: copyId, url: image.url, publicId: image.publicId,
+    id: newId(), vehicleId: copyId, url: image.url, publicId: null,
     alt: image.alt, isMain: image.isMain, position: image.position,
   }))
   if (copiedImages.length) {
@@ -166,14 +167,20 @@ export async function togglePublish(id: string, published: boolean): Promise<Act
   const db = getSupabaseAdmin()
   if (published) {
     const [{ data: vehicle, error: vehicleError }, { data: mainImage, error: imageError }] = await Promise.all([
-      db.from('vehicles').select('title,brand,model,year,salePrice,quantity,engine,city,country,damageDescription,damageLevel,damageTypes').eq('id', id).maybeSingle(),
+      db.from('vehicles').select('*').eq('id', id).maybeSingle(),
       db.from('vehicle_images').select('id').eq('vehicleId', id).eq('isMain', true).maybeSingle(),
     ])
     if (vehicleError || imageError) return { ok: false, message: 'Vérification de la fiche impossible.' }
-    if (!vehicle || !vehicle.title?.trim() || !vehicle.brand?.trim() || !vehicle.model?.trim() || !vehicle.year ||
-      !vehicle.salePrice || vehicle.quantity < 1 || !vehicle.engine?.trim() || !vehicle.city?.trim() || !vehicle.country?.trim() ||
-      !vehicle.damageDescription?.trim() || vehicle.damageLevel === 'A_DEFINIR' || !vehicle.damageTypes?.length || !mainImage) {
-      return { ok: false, message: 'Complétez les champs obligatoires, décrivez les dommages, indiquez un prix et un stock disponible, puis ajoutez et définissez la photo principale avant publication.' }
+    const requiredText = ['title', 'brand', 'model', 'vehicleType', 'category', 'engine', 'fuel', 'transmission', 'drivetrain', 'color', 'bodyCondition', 'runningCondition', 'titleStatus', 'damageDescription', 'city', 'country', 'currency', 'description']
+    const missingText = !vehicle || requiredText.some((key) => !String(vehicle[key] ?? '').trim())
+    const validNumbers = vehicle && Number(vehicle.year) >= 1980 && Number(vehicle.year) <= new Date().getFullYear() + 1 && Number(vehicle.mileage) >= 0 &&
+      Number(vehicle.power) > 0 && Number(vehicle.displacement) >= 0 && Number(vehicle.seats) > 0 &&
+      Number(vehicle.doors) > 0 && Number(vehicle.keysCount) >= 0 && Number(vehicle.quantity) > 0 &&
+      Number(vehicle.salePrice) > 0 && (vehicle.deposit == null || Number(vehicle.deposit) <= Number(vehicle.salePrice))
+    const validDescription = vehicle && vehicle.title.trim().length >= 5 && vehicle.description.trim().length >= 30 && vehicle.damageDescription.trim().length >= 10
+    const validDamage = vehicle && vehicle.damageLevel !== 'A_DEFINIR' && Array.isArray(vehicle.damageTypes) && vehicle.damageTypes.length > 0
+    if (missingText || !validNumbers || !validDescription || !validDamage || !mainImage) {
+      return { ok: false, message: 'Complétez les champs essentiels, ajoutez une description précise des dommages et une photo principale avant de publier.' }
     }
   }
   const { error } = await db.from('vehicles').update({ published, publishedAt: published ? new Date().toISOString() : null }).eq('id', id)

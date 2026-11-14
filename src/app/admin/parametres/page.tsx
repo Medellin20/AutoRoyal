@@ -28,7 +28,7 @@ export default async function SettingsPage() {
     <>
       <PageHeader
         title="Parametres"
-        description="Coordonnees du site, informations de paiement et journal des actions."
+        description="Coordonnées du site, informations de paiement et journal des actions."
       />
 
       <div className="space-y-6">
