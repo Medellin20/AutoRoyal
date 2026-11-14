@@ -13,9 +13,9 @@ cp .env.example .env
 
 Renseignez les trois variables Supabase depuis les paramètres API du projet. La clé
 `SUPABASE_SERVICE_ROLE_KEY` est strictement réservée au serveur et reste nécessaire pour charger
-les données de l’administration. Définissez également `ADMIN_PASSWORD` et `NEXTAUTH_SECRET` dans
-`.env`. Le mot de passe est le seul identifiant demandé sur `/admin/login`; aucun compte Supabase
-Auth ni adresse e-mail n’est requis pour se connecter.
+les données de l’administration. Définissez également `NEXTAUTH_SECRET` dans `.env`. Créez le
+compte administrateur dans Supabase Auth et attribuez `admin` à `app_metadata.role`; la connexion
+sur `/admin/login` vérifie l’adresse e-mail et le mot de passe avec Supabase Auth.
 
 ## Base Supabase et paiement
 

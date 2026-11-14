@@ -12,8 +12,10 @@ Dans `.env`, définissez les trois valeurs API du projet Supabase :
 - `SUPABASE_SERVICE_ROLE_KEY` (serveur uniquement)
 
 Exécutez les migrations de `supabase/migrations` dans l’ordre des noms depuis l’éditeur SQL du
-tableau de bord Supabase. Puis définissez `NEXTAUTH_SECRET` et `ADMIN_PASSWORD`. L’accès admin
-utilise uniquement ce mot de passe; aucun compte Auth ou e-mail n’est nécessaire.
+tableau de bord Supabase. Créez ou confirmez le compte administrateur dans Supabase Auth, puis
+attribuez-lui le rôle `admin` dans ses métadonnées d’application (`app_metadata.role`). Définissez
+ensuite `NEXTAUTH_SECRET`. La connexion admin vérifie l’e-mail et le mot de passe auprès de Supabase
+Auth et refuse les comptes sans rôle administrateur.
 La migration `20261114000600_vehicle_images_bucket.sql` prépare le stockage Supabase des photos
 administrées depuis la fiche véhicule.
 

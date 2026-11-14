@@ -31,6 +31,7 @@ export function LoginForm() {
     setLoading(true)
     try {
       const result = await signIn('credentials', {
+        email: parsed.data.email,
         password: parsed.data.password,
         redirect: false,
       })
@@ -38,7 +39,7 @@ export function LoginForm() {
       if (result?.error) {
         setError(
           result.error === 'CredentialsSignin'
-            ? 'Mot de passe incorrect.'
+            ? 'E-mail, mot de passe ou accès administrateur incorrect.'
             : result.error,
         )
         return
@@ -62,6 +63,10 @@ export function LoginForm() {
           {error}
         </p>
       )}
+
+      <Field label="Adresse e-mail" htmlFor="email" required error={fieldErrors.email?.[0]}>
+        <Input id="email" name="email" type="email" autoComplete="username" required />
+      </Field>
 
       <Field label="Mot de passe" htmlFor="password" required error={fieldErrors.password?.[0]}>
         <Input id="password" name="password" type="password" autoComplete="current-password" required />

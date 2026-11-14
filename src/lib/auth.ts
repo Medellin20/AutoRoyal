@@ -1,7 +1,7 @@
 import type { NextAuthOptions, DefaultSession } from 'next-auth'
 import { getServerSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { getSupabasePublic } from '@/lib/supabase'
 import { loginSchema } from '@/validations/auth'
 import type { Role } from '@/types/database'
 
@@ -41,23 +41,28 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     CredentialsProvider({
-      name: 'AdminPassword',
-      credentials: { password: { label: 'Mot de passe', type: 'password' } },
+      name: 'SupabaseAuth',
+      credentials: {
+        email: { label: 'E-mail', type: 'email' },
+        password: { label: 'Mot de passe', type: 'password' },
+      },
       async authorize(credentials) {
         const parsed = loginSchema.safeParse(credentials)
         if (!parsed.success) return null
 
-        const configuredPassword = process.env.ADMIN_PASSWORD
-        if (!configuredPassword) throw new Error('ADMIN_PASSWORD n’est pas configuré dans .env.')
+        const { data, error } = await getSupabasePublic().auth.signInWithPassword({
+          email: parsed.data.email.toLowerCase(),
+          password: parsed.data.password,
+        })
+        if (error || !data.user) return null
 
-        const submittedDigest = createHash('sha256').update(parsed.data.password).digest()
-        const configuredDigest = createHash('sha256').update(configuredPassword).digest()
-        if (!timingSafeEqual(submittedDigest, configuredDigest)) return null
+        const role = data.user.app_metadata?.role
+        if (role !== 'admin' && role !== 'SUPER_ADMIN') return null
 
         return {
-          id: 'env-admin',
-          name: process.env.ADMIN_NAME?.trim() || 'Administrateur',
-          email: process.env.ADMIN_EMAIL?.trim().toLowerCase() || 'administrateur@autoroyal.local',
+          id: data.user.id,
+          name: data.user.user_metadata?.name || data.user.email || 'Administrateur',
+          email: data.user.email,
           role: 'SUPER_ADMIN',
         }
       },

@@ -29,7 +29,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted">
-          Mot de passe administrateur configuré côté serveur.
+          Utilisez le compte administrateur configuré dans Supabase.
         </p>
       </div>
     </main>
