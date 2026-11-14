@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Clock } from 'lucide-react'
+import { Mail, MapPin, Phone, Clock } from 'lucide-react'
 import { siteConfig } from '@/config/site'
 import { footerNav } from '@/config/nav'
 import { Logo } from './logo'
@@ -18,14 +18,10 @@ export function Footer() {
           <Logo />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">{siteConfig.tagline}</p>
           <div className="mt-6 flex gap-2">
-            <a href={siteConfig.social.facebook} aria-label="Facebook" className="rounded-full border border-line bg-white p-2.5 text-muted transition-colors hover:text-accent">
-              <Facebook className="h-4 w-4" />
-            </a>
-            <a href={siteConfig.social.instagram} aria-label="Instagram" className="rounded-full border border-line bg-white p-2.5 text-muted transition-colors hover:text-accent">
-              <Instagram className="h-4 w-4" />
-            </a>
-            <a href={siteConfig.social.linkedin} aria-label="LinkedIn" className="rounded-full border border-line bg-white p-2.5 text-muted transition-colors hover:text-accent">
-              <Linkedin className="h-4 w-4" />
+            <a href={siteConfig.social.tiktok} aria-label="TikTok" className="rounded-full border border-line bg-white p-2.5 text-muted transition-colors hover:text-accent">
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.9 2.9 0 0 1-2.9 2.9 2.9 2.9 0 1 1 2.9-2.9c0-.2-.02-.4-.06-.59v-3.5a6.34 6.34 0 1 0 3.51 5.68V9.39a8.16 8.16 0 0 0 4.77 1.54V7.5a4.85 4.85 0 0 1-1-.81Z" />
+              </svg>
             </a>
           </div>
         </div>
